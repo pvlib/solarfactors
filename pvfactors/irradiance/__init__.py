@@ -1,3 +1,3 @@
 """Irradiance models"""
 
-from pvfactors.irradiance.models import IsotropicOrdered, HybridPerezOrdered
+from pvfactors.irradiance.models import IsotropicOrdered, HybridPerezOrdered  # noqa: F401
