@@ -3,10 +3,12 @@
 v1.5.3 (TBD)
 ======================
 
+Installation
+------------
+* The ``docs`` and ``testing`` extras in ``setup.py`` are now called ``doc`` and ``test`` (:pull:`1`)
+
 Enhancements
 ------------
-
-* Add python3.10 to test configuration (ghpull:`129`)
 
 
 Requirements
@@ -15,6 +17,12 @@ Requirements
 
 Bug Fixes
 ----------
+
+Testing
+-------
+* Migrated CI infrastructure to GitHub Actions (:pull:`1`)
+* Add python3.10 to test configuration (:ghpull:`129`)
+* Add python3.11 to test configuration (:pull:`1`)
 
 
 
