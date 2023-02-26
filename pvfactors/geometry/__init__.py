@@ -1,3 +1,3 @@
 """Geometry classes"""
 
-from pvfactors.geometry.pvarray import OrderedPVArray
+from pvfactors.geometry.pvarray import OrderedPVArray  # noqa: F401

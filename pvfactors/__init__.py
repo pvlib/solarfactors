@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from pvfactors.version import __version__
+from pvfactors.version import __version__  # noqa: F401
 import logging
 logging.basicConfig()
 
 try:
-    from shapely.geos import lgeos
+    from shapely.geos import lgeos  # noqa: F401
 except OSError as err:
     # https://github.com/SunPower/pvfactors/issues/109
     msg = (

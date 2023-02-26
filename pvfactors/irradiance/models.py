@@ -807,7 +807,8 @@ class HybridPerezOrdered(BaseModel):
             and sky. Dimension = [n_surfaces + 1, n_timesteps]
         """
         # Sum up the necessary parameters to form the irradiance vector
-        irradiance_mat, rho_mat, inv_rho_mat, total_perez_mat = self.get_ts_modeling_vectors(pvarray)
+        irradiance_mat, rho_mat, inv_rho_mat, total_perez_mat = \
+            self.get_ts_modeling_vectors(pvarray)
         # Add sky values
         irradiance_mat.append(self.isotropic_luminance)
         total_perez_mat.append(self.isotropic_luminance)

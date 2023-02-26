@@ -405,7 +405,8 @@ class VFTsMethods(object):
 
         Parameters
         ----------
-        pvrow_element : :py:class:`~pvfactors.geometry.timeseries.TsDualSegment` or :py:class:`~pvfactors.geometry.timeseries.TsSurface`
+        pvrow_element : :py:class:`~pvfactors.geometry.timeseries.TsDualSegment`\
+            or :py:class:`~pvfactors.geometry.timeseries.TsSurface`
             Timeseries pvrow_element to use for calculation
         pvrow_idx : int
             Index of the timeseries PV row on the which the pvrow_element is
