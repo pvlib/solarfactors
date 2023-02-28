@@ -24,10 +24,12 @@ CLASSIFIERS = [
     'Operating System :: OS Independent',
     'Intended Audience :: Science/Research',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
     'Topic :: Scientific/Engineering',
 ]
 
@@ -45,10 +47,10 @@ setup(name=DISTNAME,
       classifiers=CLASSIFIERS,
       install_requires=INSTALL_REQUIRES,
       extras_require={
-          'testing': TESTS_REQUIRES,
-          'docs': ['Sphinx', 'sphinx_rtd_theme', 'nbsphinx',
-                   'sphinxcontrib-napoleon', 'sphinxcontrib_github_alt',
-                   'ipykernel']
+          'test': TESTS_REQUIRES,
+          'doc': ['Sphinx~=4.0', 'sphinx_rtd_theme', 'nbsphinx',
+                  'sphinxcontrib_github_alt',
+                  'ipykernel']
       },
       license=LICENSE
       )

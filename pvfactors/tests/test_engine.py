@@ -554,9 +554,53 @@ def test_check_direct_shading_continuity():
     out = pvarray.ts_pvrows[1].back.get_param_weighted('qinc')
 
     # Check expected outputs: before v1.3.0, expected output is
-    # [20.4971271991293, 21.389095477613356], which shows discontinuity
-    expected_out = [20.497127, 20.50229]
+    # [20.4971271991293, 21.389095477613356], which shows discontinuity.
+    # Update 2021-10-04 for v1.5.2: for pvlib <0.9.0, expected value
+    # was [20.497127, 20.50229]. The values changed slightly because
+    # of a bugfix to the Perez model in pvlib 0.9.0. See pvfactors PR #121.
+    expected_out = [20.936348, 20.942163]
     np.testing.assert_allclose(out, expected_out)
+
+
+def test_check_tilt_zero_discontinuity():
+    """
+    Before version 1.5.2, surface_tilt=0 with certain combinations of
+    surface_azimuth and axis_azimuth showed anomolous behavior where
+    the irradiance at zero tilt was significantly different from the
+    irradiance at very small but nonzero tilts.  Additionally, the
+    calculated VF matrix could have values outside [0, 1].  See GH #125
+    """
+    # expected value calculated for surface_tilt=0.001, so should
+    # not be significantly different from result for surface_tilt=0
+    rear_qinc_expected = 76.10
+
+    timestamps = np.array([dt.datetime(2019, 6, 1, 10)])
+    solar_azimuth = np.array([135])
+    solar_zenith = np.array([45])
+    dni = np.array([200])
+    dhi = np.array([400])
+    albedo = np.array([0.2])
+    surface_tilt = np.array([0.0])
+
+    # the discontinuity did not occur for all combinations of
+    # (surface_azimuth, axis_azimuth), so test all four "primary" pairs:
+    for surface_azimuth in [90, 270]:
+        surface_azimuth = np.array([surface_azimuth])
+        for axis_azimuth in [0, 180]:
+            params = dict(n_pvrows=3, axis_azimuth=axis_azimuth,
+                          pvrow_height=2, pvrow_width=1, gcr=0.4)
+
+            pvarray = OrderedPVArray.init_from_dict(params)
+            eng = PVEngine(pvarray)
+            eng.fit(timestamps, dni, dhi, solar_zenith, solar_azimuth,
+                    surface_tilt, surface_azimuth, albedo)
+
+            # Run simulation and get output
+            eng.run_full_mode()
+            out = pvarray.ts_pvrows[1].back.get_param_weighted('qinc')
+            assert np.all(pvarray.ts_vf_matrix >= 0)
+            assert np.all(pvarray.ts_vf_matrix <= 1)
+            assert rear_qinc_expected == pytest.approx(out[0], abs=1e-2)
 
 
 def test_create_engine_with_rho_init(params, pvmodule_canadian):
@@ -608,21 +652,21 @@ def test_engine_w_faoi_fn_in_irradiance_vfcalcs(params, pvmodule_canadian):
     # Run timestep
     pvarray = eng.run_full_mode(fn_build_report=lambda pvarray: pvarray)
     # Checks
-    np.testing.assert_almost_equal(
+    np.testing.assert_allclose(
         pvarray.ts_pvrows[0].front.get_param_weighted('qinc'),
         1110.1164773159298)
-    np.testing.assert_almost_equal(
+    np.testing.assert_allclose(
         pvarray.ts_pvrows[1].front.get_param_weighted('qinc'), 1110.595903991)
-    np.testing.assert_almost_equal(
+    np.testing.assert_allclose(
         pvarray.ts_pvrows[2].front.get_param_weighted('qinc'), 1112.37717553)
-    np.testing.assert_almost_equal(
+    np.testing.assert_allclose(
         pvarray.ts_pvrows[1].back.get_param_weighted('qinc'),
         116.49050349491208)
     # Check absorbed irradiance: calculated using faoi functions
-    np.testing.assert_almost_equal(
+    np.testing.assert_allclose(
         pvarray.ts_pvrows[2].front.get_param_weighted('qabs'),
-        [1109.1180884])
-    np.testing.assert_almost_equal(
+        [1109.1180884], rtol=1e-6)
+    np.testing.assert_allclose(
         pvarray.ts_pvrows[1].back.get_param_weighted('qabs'),
         [114.2143503])
 
