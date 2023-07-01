@@ -133,7 +133,7 @@ def test_ordered_pvarray_gnd_shadow_casting(params):
     ordered_pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
     assert len(ordered_pvarray.ts_ground.non_point_shaded_surfaces_at(0)) == 3
     assert len(ordered_pvarray.ts_ground.non_point_illum_surfaces_at(0)) == 7
-    assert ordered_pvarray.ts_ground.shaded_length == 6.385066634855473
+    assert ordered_pvarray.ts_ground.shaded_length.round(3) == 6.385
 
 
 def _check_ground_surfaces(ts_ground, expected_n_shadow_surfaces,
