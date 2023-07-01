@@ -1,22 +1,19 @@
 .. _whatsnew_153:
 
-v1.5.3 (TBD)
+v1.5.3 (June 30, 2023)
 ======================
+
+This is the first release of the ``solarfactors`` fork.  It is functionally
 
 Installation
 ------------
 * The ``docs`` and ``testing`` extras in ``setup.py`` are now called ``doc`` and ``test`` (:pull:`1`)
 
-Enhancements
-------------
-
 
 Requirements
 ------------
+* Removed the upper version limit on ``pvlib`` (:pull:`5`)
 
-
-Bug Fixes
-----------
 
 Testing
 -------
@@ -28,4 +25,4 @@ Testing
 
 Contributors
 ------------
-* Kevin Anderson (:ghuser:`kanderso-nrel`)
+* Kevin Anderson (:ghuser:`kandersolar`)
