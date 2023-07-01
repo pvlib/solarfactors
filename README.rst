@@ -1,3 +1,25 @@
+pvlib/solarfactors: a fork of SunPower/pvfactors
+================================================
+
+This repository is a fork of `SunPower/solarfactors <https://github.com/sunpower/pvfactors>`_,
+a 2-D view factor model for simulating front- and rear-side irradiance for
+bifacial PV systems.
+
+This fork exists so that the pvfactors model can continue to be used with
+`pvlib python <https://github.com/pvlib/pvlib-python>`_ even though the original
+repository is no longer maintained.  The objective is to provide a working
+dependency for the existing pvfactors functionality currently in pvlib python.
+New features may be added, but don't count on it.
+
+Documentation for this fork can be found at `Read The Docs <https://solarfactors.readthedocs.io>`_.
+
+The project can be installed from PyPI using ``pip install solarfactors``.  Note
+that the package is still used from python under the ``pvfactors`` name, i.e.
+with ``from pvfactors.geometry import OrderedPVArray``.
+
+The original ``pvfactors`` is preserved below:
+
+
 pvfactors: irradiance modeling made simple
 ==========================================
 
