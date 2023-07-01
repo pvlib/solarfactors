@@ -11,10 +11,10 @@ with open('README.rst', 'r') as f:
 with open('requirements.txt', 'r') as f:
     INSTALL_REQUIRES = list(f)
 
-DISTNAME = 'pvfactors'
-AUTHOR = 'SunPower'
-MAINTAINER_EMAIL = 'marc.abouanoma@sunpowercorp.com'
-URL = 'https://github.com/SunPower/pvfactors'
+DISTNAME = 'solarfactors'
+AUTHOR = 'SunPower and pvlib python Developers'
+MAINTAINER_EMAIL = 'pvlib-admin@googlegroups.com'
+URL = 'https://github.com/pvlib/solarfactors'
 PACKAGES = ['pvfactors', 'pvfactors.geometry', 'pvfactors.irradiance',
             'pvfactors.viewfactors']
 LICENSE = 'BSD 3-Clause'
@@ -24,7 +24,6 @@ CLASSIFIERS = [
     'Operating System :: OS Independent',
     'Intended Audience :: Science/Research',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',

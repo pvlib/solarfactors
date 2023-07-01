@@ -48,10 +48,12 @@ extensions = [
     'sphinx.ext.coverage',
     'nbsphinx',
     'sphinx.ext.napoleon',
+    'sphinx.ext.extlinks',
     'sphinxcontrib_github_alt'
 ]
 
-# For sphinxcontrib_github_alt
+# For sphinxcontrib_github_alt.  keep this as the original repo for old links
+# (since new links use extlinks instead of this)
 github_project_url = "https://github.com/SunPower/pvfactors"
 
 # Add any paths that contain templates here, relative to this directory.
@@ -69,9 +71,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'pvfactors'
-copyright = u'2016, SunPower Corporation'
-author = u'SunPower Corporation'
+project = u'solarfactors'
+copyright = u'2016, SunPower Corporation and pvlib python Developers'
+author = u'SunPower Corporation and pvlib python Developers'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -135,8 +137,8 @@ html_theme = 'sphinx_rtd_theme'
 
 html_context = {
     'display_github': True,
-    'github_user': 'SunPower',
-    'github_repo': 'pvfactors'
+    'github_user': 'pvlib',
+    'github_repo': 'solarfactors'
 }
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -146,7 +148,7 @@ html_theme_options = {}
 
 # Make sure the "Edit on Github" link is not broken
 rst_prolog = """
-:github_url: https://github.com/SunPower/pvfactors/
+:github_url: https://github.com/pvlib/solarfactors/
 
 """
 
@@ -336,3 +338,11 @@ autosummary_generate = True
 
 def setup(app):
     app.add_css_file('css/custom.css')
+
+
+extlinks = {
+    'issue': ('https://github.com/pvlib/solarfactors/issues/%s', 'GH'),
+    'pull': ('https://github.com/pvlib/solarfactors/pull/%s', 'GH'),
+    'doi': ('http://dx.doi.org/%s', 'DOI: '),
+    'ghuser': ('https://github.com/%s', '@')
+}
