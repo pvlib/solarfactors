@@ -3,7 +3,7 @@
 v1.5.3 (June 30, 2023)
 ======================
 
-This is the first release of the ``solarfactors`` fork.  It is functionally
+This is the first release of the ``solarfactors`` fork.
 
 Installation
 ------------
