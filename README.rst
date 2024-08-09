@@ -32,7 +32,7 @@ irradiance incident on surfaces of a photovoltaic array. It relies on the use of
 2D geometries and view factors integrated mathematically into systems of
 equations to account for reflections between all of the surfaces.
 
-pvfactors was originally ported from the SunPower developed 'vf_model' package, which was introduced at the IEEE PV Specialist Conference 44 2017 (see [#pvfactors_paper]_ and link_ to paper).
+pvfactors was originally ported from the SunPower-developed 'vf_model' package, which was introduced at the IEEE PV Specialist Conference 44 2017 (see [#pvfactors_paper]_ and link_ to paper).
 
 ------------------------------------------
 
