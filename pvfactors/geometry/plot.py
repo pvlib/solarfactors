@@ -33,10 +33,10 @@ def plot_bounds(ax, ob):
 
     """
     # Check if shadow reduces to one point (for very specific sun alignment)
-    if len(ob.boundary) == 0:
+    if len(ob.boundary.geoms) == 0:
         x, y = ob.coords[0]
     else:
-        x, y = zip(*list((p.x, p.y) for p in ob.boundary))
+        x, y = zip(*list((p.x, p.y) for p in ob.boundary.geoms))
     ax.plot(x, y, 'o', color='#000000', zorder=1)
 
 
