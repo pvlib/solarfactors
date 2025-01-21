@@ -967,6 +967,9 @@ class BaseSide:
     def length(self):
         return self.geometry.length
 
+    def distance(self, *args, **kwargs):
+        return self.geometry.distance(*args, **kwargs)
+
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
                                index=None, n_segments=1, param_names=None):
