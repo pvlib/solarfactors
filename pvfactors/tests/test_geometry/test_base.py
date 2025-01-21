@@ -10,9 +10,7 @@ from pvfactors.geometry.utils import projection
 
 def test_baseside(pvsegments):
     """Test that the basic BaseSide functionalities work"""
-
     side = BaseSide(pvsegments)
-
     np.testing.assert_array_equal(side.n_vector, [0, 1])
     assert side.shaded_length == 1.
 
@@ -147,7 +145,6 @@ def test_cast_shadow_side():
 
 def test_pvsurface_difference_precision_error():
     """This would lead to wrong result using shapely ``difference`` method"""
-
     surf_1 = PVSurface([(0, 0), (3, 2)])
     surf_2 = PVSurface([surf_1.interpolate(1), Point(6, 4)])
     diff = surf_1.difference(surf_2)
