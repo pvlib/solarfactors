@@ -23,8 +23,8 @@ def difference(u, v):
     :py:class:`shapely.geometry.LineString`
        Resulting difference of current surface minus given linestring
     """
-    ub1, ub2 = u.boundary
-    vb1, vb2 = v.boundary
+    ub1, ub2 = u.boundary.geoms
+    vb1, vb2 = v.boundary.geoms
     u_contains_vb1 = contains(u, vb1)
     u_contains_vb2 = contains(u, vb2)
     v_contains_ub1 = contains(v, ub1)
@@ -130,7 +130,7 @@ def projection(point, vector, linestring, must_contain=True):
     a, b = -vector[1], vector[0]
     c = - (a * point.x + b * point.y)
     # Define equation d*x + e*y +f = 0
-    b1, b2 = linestring.boundary
+    b1, b2 = linestring.boundary.geoms
     d, e = - (b2.y - b1.y), b2.x - b1.x
     f = - (d * b1.x + e * b1.y)
     # TODO: check that two lines are not parallel

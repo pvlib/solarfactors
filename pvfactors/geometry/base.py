@@ -205,9 +205,31 @@ class BaseSurface:
         """Check if the surface is empty."""
         return self.geometry.is_empty
 
+    @property
+    def length(self):
+        """Return the length of the surface."""
+        return self.geometry.length
+
+    @property
+    def boundary(self):
+        """Return the boundary of the surface."""
+        return self.geometry.boundary
+
+    def interpolate(self, *args, **kwargs):
+        """Interpolate along the linestring by the given distance."""
+        return self.geometry.interpolate(*args, **kwargs)
+
+    def distance(self, *args, **kwargs):
+        """Distance between the surface and another geometry."""
+        return self.geometry.distance(*args, **kwargs)
+
+    def buffer(self, *args, **kwargs):
+        """Buffer the surface."""
+        return self.geometry.buffer(*args, **kwargs)
+
     def _calculate_n_vector(self):
         """Calculate normal vector of the surface, if surface is not empty"""
-        if not self.geometry.is_empty:
+        if not self.is_empty:
             b1, b2 = self.geometry.boundary.geoms
             dx = b2.x - b1.x
             dy = b2.y - b1.y
@@ -486,7 +508,7 @@ class ShadeCollection:
         for idx, surface in enumerate(self.list_surfaces):
             if contains(surface, point):
                 # Make sure that not hitting a boundary
-                b1, b2 = surface.boundary
+                b1, b2 = surface.boundary.geoms
                 not_hitting_b1 = b1.distance(point) > DISTANCE_TOLERANCE
                 not_hitting_b2 = b2.distance(point) > DISTANCE_TOLERANCE
                 if not_hitting_b1 and not_hitting_b2:
@@ -631,7 +653,6 @@ class PVSegment:
         self._shaded_collection = shaded_collection
         self._illum_collection = illum_collection
         self.index = index
-        self._all_surfaces = None
 
     @property
     def geometry(self):
@@ -708,7 +729,7 @@ class PVSegment:
         # Using a buffer may slow things down, but it's quite crucial
         # in order for shapely to get the intersection accurately see:
         # https://stackoverflow.com/questions/28028910/how-to-deal-with-rounding-errors-in-shapely
-        intersection = (self._illum_collection.buffer(DISTANCE_TOLERANCE)
+        intersection = (self._illum_collection.geometry.buffer(DISTANCE_TOLERANCE)
                         .intersection(linestring))
         if not intersection.is_empty:
             # Split up only if interesects the illuminated collection
@@ -718,8 +739,6 @@ class PVSegment:
             # print(self._shaded_collection.length)
             self._illum_collection.remove_linestring(intersection)
             # print(self._illum_collection.length)
-            super(PVSegment, self).__init__([self._shaded_collection,
-                                             self._illum_collection])
 
     def cut_at_point(self, point):
         """Cut PV segment at point if the segment contains it.
@@ -865,16 +884,12 @@ class PVSegment:
         """
         assert new_collection.shaded, "surface should be shaded"
         self._shaded_collection = new_collection
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
 
     @shaded_collection.deleter
     def shaded_collection(self):
         """Delete shaded collection of PV segment and replace with empty one.
         """
         self._shaded_collection = ShadeCollection(shaded=True)
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
 
     @property
     def illum_collection(self):
@@ -892,16 +907,12 @@ class PVSegment:
         """
         assert not new_collection.shaded, "surface should not be shaded"
         self._illum_collection = new_collection
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
 
     @illum_collection.deleter
     def illum_collection(self):
         """Delete illuminated collection of PV segment and replace with empty
         one."""
         self._illum_collection = ShadeCollection(shaded=False)
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
 
     @property
     def shaded_length(self):
@@ -923,11 +934,8 @@ class PVSegment:
         list of :py:class:`~pvfactors.geometry.base.PVSurface`
             PV surfaces in the PV segment
         """
-        if self._all_surfaces is None:
-            self._all_surfaces = []
-            self._all_surfaces += self._illum_collection.list_surfaces
-            self._all_surfaces += self._shaded_collection.list_surfaces
-        return self._all_surfaces
+        return self._illum_collection.list_surfaces + \
+            self._shaded_collection.list_surfaces
 
 
 class BaseSide:
@@ -1091,11 +1099,11 @@ class BaseSide:
             Point where to cut side geometry, if the latter contains the
             former
         """
-        if contains(self, point):
+        if contains(self.geometry, point):
             for segment in self.list_segments:
                 # Nothing will happen to the segments that do not contain
                 # the point
-                segment.cut_at_point(point)
+                segment.geometry.cut_at_point(point)
 
     def get_param_weighted(self, param):
         """Get the parameter from the side's surfaces, after weighting
