@@ -17,7 +17,24 @@ The project can be installed from PyPI using ``pip install solarfactors``.  Note
 that the package is still used from python under the ``pvfactors`` name, i.e.
 with ``from pvfactors.geometry import OrderedPVArray``.
 
-The original ``pvfactors`` is preserved below:
+Testing
+-------
+
+Install test dependencies by running:
+
+.. code:: sh
+
+    $ pip install pytest mock
+
+Then run the tests using:
+
+.. code:: sh
+
+    $ python -m pytest
+
+You will need to close manually the plots that are generated during the tests.
+
+The original ``pvfactors`` README is preserved below:
 
 
 pvfactors: irradiance modeling made simple
