@@ -9,7 +9,6 @@ This fork exists so that the pvfactors model can continue to be used with
 `pvlib python <https://github.com/pvlib/pvlib-python>`_ even though the original
 repository is no longer maintained.  The objective is to provide a working
 dependency for the existing pvfactors functionality currently in pvlib python.
-New features may be added, but don't count on it.
 
 Documentation for this fork can be found at `Read The Docs <https://solarfactors.readthedocs.io>`_.
 
