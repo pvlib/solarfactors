@@ -219,6 +219,10 @@ class BaseSurface:
     def coords(self):
         return self.geometry.coords
 
+    @property
+    def centroid(self):
+        return self.geometry.centroid
+
     def interpolate(self, *args, **kwargs):
         """Interpolate along the linestring by the given distance."""
         return self.geometry.interpolate(*args, **kwargs)
