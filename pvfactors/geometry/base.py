@@ -215,6 +215,10 @@ class BaseSurface:
         """Return the boundary of the surface."""
         return self.geometry.boundary
 
+    @property
+    def coords(self):
+        return self.geometry.coords
+
     def interpolate(self, *args, **kwargs):
         """Interpolate along the linestring by the given distance."""
         return self.geometry.interpolate(*args, **kwargs)
@@ -479,9 +483,11 @@ class ShadeCollection:
                 difference = surface.difference(linestring)
                 # We want to make sure we can iterate on it, as
                 # ``difference`` can be a multi-part geometry or not
-                if not hasattr(difference, '__iter__'):
-                    difference = [difference]
-                for new_geom in difference:
+                if isinstance(difference, LineString):
+                    geoms = [difference]
+                else:
+                    geoms = difference.geoms
+                for new_geom in geoms:
                     if not new_geom.is_empty:
                         new_surface = PVSurface(
                             new_geom.coords, normal_vector=surface.n_vector,
