@@ -654,9 +654,10 @@ class TsSegment(object):
 
 class PVRowSide(BaseSide):
     """A PV row side represents the whole surface of one side of a PV row.
+
     At its core it will contain a fixed number of
     :py:class:`~pvfactors.geometry.base.PVSegment` objects that will together
-    constitue one side of a PV row: a PV row side can also be
+    constitute one side of a PV row: a PV row side can also be
     "discretized" into multiple segments"""
 
     def __init__(self, list_segments=[]):
@@ -671,7 +672,7 @@ class PVRowSide(BaseSide):
         super(PVRowSide, self).__init__(list_segments)
 
 
-class PVRow(GeometryCollection):
+class PVRow:
     """A PV row is made of two PV row sides, a front and a back one."""
 
     def __init__(self, front_side=PVRowSide(), back_side=PVRowSide(),
@@ -689,14 +690,34 @@ class PVRow(GeometryCollection):
         original_linestring : :py:class:`shapely.geometry.LineString`, optional
             Full continuous linestring that the PV row will be made of
             (Default = None)
-
         """
         self.front = front_side
         self.back = back_side
         self.index = index
         self.original_linestring = original_linestring
-        self._all_surfaces = None
-        super(PVRow, self).__init__([self.front, self.back])
+
+    @property
+    def length(self):
+        """Length of the PV row."""
+        return self.front.length + self.back.length
+
+    def intersects(self, line):
+        """Check if the PV row intersects with a line.
+
+        Parameters
+        ----------
+        line : :py:class:`shapely.geometry.LineString`
+            Line to check for intersection
+
+        Returns
+        -------
+        bool
+            True if the PV row intersects with the line, False otherwise
+        """
+        if self.original_linestring is not None:
+            return self.original_linestring.intersects(line)
+        else:
+            return self.front.intersects(line) or self.back.intersects(line)
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
@@ -812,7 +833,7 @@ class PVRow(GeometryCollection):
 
     @property
     def boundary(self):
-        """Boundaries of the PV Row's orginal linestring."""
+        """Boundaries of the PV Row's original linestring."""
         return self.original_linestring.boundary
 
     @property
@@ -832,11 +853,7 @@ class PVRow(GeometryCollection):
     @property
     def all_surfaces(self):
         """List of all the surfaces in the PV row."""
-        if self._all_surfaces is None:
-            self._all_surfaces = []
-            self._all_surfaces += self.front.all_surfaces
-            self._all_surfaces += self.back.all_surfaces
-        return self._all_surfaces
+        return self.front.all_surfaces + self.back.all_surfaces
 
     @property
     def surface_indices(self):
