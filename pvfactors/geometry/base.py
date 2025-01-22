@@ -390,6 +390,10 @@ class ShadeCollection:
         """Convenience property to get the total length of all lines in the collection."""
         return self.geometry.length
 
+    def distance(self, *args, **kwargs):
+        """Distance between the collection and another geometry."""
+        return self.geometry.distance(*args, **kwargs)
+
     def _get_shading(self, shaded):
         """Get the surface shading from the provided list of pv surfaces.
 
@@ -486,7 +490,7 @@ class ShadeCollection:
         """Merge all surfaces in the shade collection into one contiguous
         surface, even if they're not contiguous, by using bounds."""
         if len(self.list_surfaces) > 1:
-            merged_lines = linemerge(self.list_surfaces)
+            merged_lines = linemerge(self.geometry)
             minx, miny, maxx, maxy = merged_lines.bounds
             surf_1 = self.list_surfaces[0]
             new_pvsurf = PVSurface(
@@ -494,7 +498,6 @@ class ShadeCollection:
                 shaded=self.shaded, normal_vector=surf_1.n_vector,
                 param_names=surf_1.param_names)
             self.list_surfaces = [new_pvsurf]
-            self.update_geom_collection(self.list_surfaces)
 
     def cut_at_point(self, point):
         """Cut collection at point if the collection contains it.
@@ -526,7 +529,6 @@ class ShadeCollection:
                     # Now update collection
                     self.list_surfaces[idx] = new_surf_1
                     self.list_surfaces.append(new_surf_2)
-                    self.update_geom_collection(self.list_surfaces)
                     # No need to continue the loop
                     break
 
@@ -666,6 +668,9 @@ class PVSegment:
     @property
     def length(self):
         return self.geometry.length
+
+    def distance(self, *args, **kwargs):
+        return self.geometry.distance(*args, **kwargs)
 
     def _check_collinear(self, illum_collection, shaded_collection):
         """Check that all the surfaces in the PV segment are collinear.
@@ -1106,7 +1111,7 @@ class BaseSide:
             for segment in self.list_segments:
                 # Nothing will happen to the segments that do not contain
                 # the point
-                segment.geometry.cut_at_point(point)
+                segment.cut_at_point(point)
 
     def get_param_weighted(self, param):
         """Get the parameter from the side's surfaces, after weighting
