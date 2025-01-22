@@ -1,6 +1,7 @@
 """Module will classes related to PV row geometries"""
 
 import numpy as np
+from shapely.ops import unary_union, linemerge
 from pvfactors.config import COLOR_DIC
 from pvfactors.geometry.base import \
     BaseSide, _coords_from_center_tilt_length, PVSegment
@@ -694,12 +695,23 @@ class PVRow:
         self.front = front_side
         self.back = back_side
         self.index = index
-        self.original_linestring = original_linestring
+        if original_linestring is None:
+            # Compute the union of the front and back sides, assumedly a
+            # linestring with only two points (TODO: check this assumption /
+            # issue a warning here)
+            self._linestring = LineString(linemerge(unary_union(
+                [front_side.geometry, back_side.geometry])).boundary.geoms)
+        else:
+            self._linestring = original_linestring
 
     @property
     def length(self):
         """Length of the PV row."""
         return self.front.length + self.back.length
+
+    @property
+    def boundary(self):
+        return self._linestring.boundary
 
     def intersects(self, line):
         """Check if the PV row intersects with a line.
@@ -714,10 +726,7 @@ class PVRow:
         bool
             True if the PV row intersects with the line, False otherwise
         """
-        if self.original_linestring is not None:
-            return self.original_linestring.intersects(line)
-        else:
-            return self.front.intersects(line) or self.back.intersects(line)
+        return self._linestring.intersects(line)
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
@@ -740,7 +749,7 @@ class PVRow:
             Eg {'front': 3, 'back': 2} will lead to 3 segments on front side
             and 2 segments on back side. (Default = {})
         param_names : list of str, optional
-            Names of the surface parameters, eg reflectivity, total incident
+            Names of the surface parameters, e.g. reflectivity, total incident
             irradiance, temperature, etc. (Default = [])
 
         Returns
@@ -834,12 +843,12 @@ class PVRow:
     @property
     def boundary(self):
         """Boundaries of the PV Row's original linestring."""
-        return self.original_linestring.boundary
+        return self._linestring.boundary
 
     @property
     def highest_point(self):
         """Highest point of the PV Row."""
-        b1, b2 = self.boundary
+        b1, b2 = self.boundary.geoms
         highest_point = b1 if b1.y > b2.y else b2
         return highest_point
 
