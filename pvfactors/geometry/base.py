@@ -967,7 +967,7 @@ class PVSegment:
 
 
 class BaseSide:
-    """A side represents a fixed collection of PV segments objects that should
+    """A side represents a fixed collection of PV segment objects that should
     all be collinear, with the same normal vector"""
 
     def __init__(self, list_segments=None):
@@ -997,6 +997,9 @@ class BaseSide:
 
     def distance(self, *args, **kwargs):
         return self.geometry.distance(*args, **kwargs)
+
+    def intersects(self, *args, **kwargs):
+        return self.geometry.intersects(*args, **kwargs)
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
