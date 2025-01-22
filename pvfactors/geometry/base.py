@@ -374,11 +374,16 @@ class ShadeCollection:
         self.shaded = self._get_shading(shaded)
         self.is_collinear = is_collinear(list_surfaces)
         self.param_names = param_names
+        self._geometry_valid = False
+        self._geometry = None
 
     @property
     def geometry(self):
         """Return a Shapely GeometryCollection built from the current surfaces."""
-        return GeometryCollection([_.geometry for _ in self.list_surfaces])
+        if not self._geometry_valid:
+            self._geometry = GeometryCollection([_.geometry for _ in self.list_surfaces])
+            self._geometry_valid = True
+        return self._geometry
 
     @property
     def is_empty(self):
@@ -455,6 +460,7 @@ class ShadeCollection:
         """
         self.list_surfaces.append(pvsurface)
         self.is_collinear = is_collinear(self.list_surfaces)
+        self._geometry_valid = False
 
     def remove_linestring(self, linestring):
         """Remove linestring from shade collection.
@@ -485,6 +491,7 @@ class ShadeCollection:
             else:
                 new_list_surfaces.append(surface)
         self.list_surfaces = new_list_surfaces
+        self._geometry_valid = False
 
     def merge_surfaces(self):
         """Merge all surfaces in the shade collection into one contiguous
@@ -498,6 +505,7 @@ class ShadeCollection:
                 shaded=self.shaded, normal_vector=surf_1.n_vector,
                 param_names=surf_1.param_names)
             self.list_surfaces = [new_pvsurf]
+            self._geometry_valid = False
 
     def cut_at_point(self, point):
         """Cut collection at point if the collection contains it.
@@ -530,6 +538,7 @@ class ShadeCollection:
                     self.list_surfaces[idx] = new_surf_1
                     self.list_surfaces.append(new_surf_2)
                     # No need to continue the loop
+                    self._geometry_valid = False
                     break
 
     def get_param_weighted(self, param):
@@ -655,11 +664,16 @@ class PVSegment:
         self._shaded_collection = shaded_collection
         self._illum_collection = illum_collection
         self.index = index
+        self._geometry_valid = False
+        self._geometry = None
 
     @property
     def geometry(self):
-        return GeometryCollection([self._shaded_collection.geometry,
-                                   self._illum_collection.geometry])
+        if not self._geometry_valid:
+            self._geometry = GeometryCollection([self._shaded_collection.geometry,
+                                                 self._illum_collection.geometry])
+            self._geometry_valid = True
+        return self._geometry
 
     @property
     def is_empty(self):
@@ -737,13 +751,11 @@ class PVSegment:
         intersection = (self._illum_collection.geometry.buffer(DISTANCE_TOLERANCE)
                         .intersection(linestring))
         if not intersection.is_empty:
-            # Split up only if interesects the illuminated collection
-            # print(intersection)
+            # Split up only if intersects the illuminated collection
             self._shaded_collection.add_linestring(intersection,
                                                    normal_vector=self.n_vector)
-            # print(self._shaded_collection.length)
             self._illum_collection.remove_linestring(intersection)
-            # print(self._illum_collection.length)
+            self._geometry_valid = False
 
     def cut_at_point(self, point):
         """Cut PV segment at point if the segment contains it.
@@ -759,6 +771,7 @@ class PVSegment:
                 self._illum_collection.cut_at_point(point)
             else:
                 self._shaded_collection.cut_at_point(point)
+            self._geometry_valid = False
 
     def get_param_weighted(self, param):
         """Get the parameter from the segment's surfaces, after weighting
@@ -889,12 +902,14 @@ class PVSegment:
         """
         assert new_collection.shaded, "surface should be shaded"
         self._shaded_collection = new_collection
+        self._geometry_valid = False
 
     @shaded_collection.deleter
     def shaded_collection(self):
         """Delete shaded collection of PV segment and replace with empty one.
         """
         self._shaded_collection = ShadeCollection(shaded=True)
+        self._geometry_valid = False
 
     @property
     def illum_collection(self):
@@ -912,12 +927,14 @@ class PVSegment:
         """
         assert not new_collection.shaded, "surface should not be shaded"
         self._illum_collection = new_collection
+        self._geometry_valid = False
 
     @illum_collection.deleter
     def illum_collection(self):
         """Delete illuminated collection of PV segment and replace with empty
         one."""
         self._illum_collection = ShadeCollection(shaded=False)
+        self._geometry_valid = False
 
     @property
     def shaded_length(self):
