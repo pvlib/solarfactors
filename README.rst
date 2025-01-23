@@ -9,15 +9,12 @@ This fork exists so that the pvfactors model can continue to be used with
 `pvlib python <https://github.com/pvlib/pvlib-python>`_ even though the original
 repository is no longer maintained.  The objective is to provide a working
 dependency for the existing pvfactors functionality currently in pvlib python.
-New features may be added, but don't count on it.
 
-Documentation for this fork can be found at `Read The Docs <https://solarfactors.readthedocs.io>`_.
+Documentation for this fork can be found at `Read the Docs <https://solarfactors.readthedocs.io>`_.
 
 The project can be installed from PyPI using ``pip install solarfactors``.  Note
 that the package is still used from python under the ``pvfactors`` name, i.e.
 with ``from pvfactors.geometry import OrderedPVArray``.
-
-The original ``pvfactors`` is preserved below:
 
 
 pvfactors: irradiance modeling made simple
@@ -34,6 +31,8 @@ equations to account for reflections between all of the surfaces.
 
 pvfactors was originally ported from the SunPower developed 'vf_model' package, which was introduced at the IEEE PV Specialist Conference 44 2017 (see [#pvfactors_paper]_ and link_ to paper).
 
+This fork, `pvlib/solarfactors <https://github.com/pvlib/solarfactors>`_ is maintained by the pvlib project with contributions from the pvlib community.
+
 ------------------------------------------
 
 .. contents:: Table of contents
@@ -44,8 +43,8 @@ pvfactors was originally ported from the SunPower developed 'vf_model' package, 
 Documentation
 -------------
 
-The documentation can be found `here <https://sunpower.github.io/pvfactors>`_.
-It includes a lot of tutorials_ that describe the different ways of using pvfactors.
+The documentation of this fork can be found `here <https://solarfactors.readthedocs.io>`_.
+It includes a lot of tutorials_ that describe the different ways of using solarfactors.
 
 
 Quick Start
@@ -187,11 +186,11 @@ The users can also create a "report" while running the simulations that will rel
 Installation
 ------------
 
-pvfactors is currently compatible and tested with 3.6+, and is available in `PyPI <https://pypi.org/project/pvfactors/>`_. The easiest way to install pvfactors is to use pip_ as follows:
+pvfactors is currently compatible and tested with Python 3.11 and Shapely 2.0.6, and is available in `PyPI <https://pypi.org/project/solarfactors/>`_. The easiest way to install solarfactors is to use pip_ as follows:
 
 .. code:: sh
 
-    $ pip install pvfactors
+    $ pip install solarfactors
 
 The package wheel files are also available in the `release section`_ of the Github repository.
 
@@ -203,13 +202,13 @@ Requirements are included in the ``requirements.txt`` file of the package. Here 
 
 * `numpy <https://pypi.python.org/pypi/numpy>`_
 * `pvlib-python <https://pypi.python.org/pypi/pvlib>`_
-* `shapely <https://pypi.python.org/pypi/Shapely>`_
+* `shapely <https://pypi.python.org/pypi/Shapely>`_ (version >= 2.0)
 
 
 Citing pvfactors
 ----------------
 
-We appreciate your use of pvfactors. If you use pvfactors in a published work, we kindly ask that you cite:
+If you use openfactors in a published work, cite the following paper:
 
 
 .. parsed-literal::
@@ -220,8 +219,9 @@ We appreciate your use of pvfactors. If you use pvfactors in a published work, w
 Contributing
 ------------
 
-Contributions are needed in order to improve pvfactors.
-If you wish to contribute, you can start by forking and cloning the repository, and then installing pvfactors using pip_ in the root folder of the package:
+Contributions are needed in order to improve openfactors.
+
+If you wish to contribute, you can start by forking and cloning the repository, and then installing openfactors using pip_ in the root folder of the package:
 
 .. code:: sh
 
@@ -233,6 +233,25 @@ To install the package in editable mode, you can use:
 .. code:: sh
 
     $ pip install -e .
+
+
+Testing
++++++++
+
+Install test dependencies by running:
+
+.. code:: sh
+
+    $ pip install pytest mock
+
+Then run the tests using:
+
+.. code:: sh
+
+    $ python -m pytest
+
+You will need to close manually the plots that are generated during the tests, unless you define the ``CI`` environment variable, which will disable the tests that generate plots.
+
 
 Releasing
 +++++++++
@@ -254,27 +273,27 @@ References
 
 .. _link: https://pdfs.semanticscholar.org/ebb2/35e3c3796b158e1a3c45b40954e60d876ea9.pdf
 
-.. _tutorials: https://sunpower.github.io/pvfactors/tutorials/index.html
+.. _tutorials: https://solarfactors.readthedocs.io/en/latest/tutorials/index.html
 
-.. _`full mode`: https://sunpower.github.io/pvfactors/theory/problem_formulation.html#full-simulations
+.. _`full mode`: https://solarfactors.readthedocs.io/en/latest/theory/problem_formulation.html#full-simulations
 
-.. _`fast mode`: https://sunpower.github.io/pvfactors/theory/problem_formulation.html#fast-simulations
+.. _`fast mode`: https://solarfactors.readthedocs.io/en/latest/theory/problem_formulation.html#fast-simulations
 
 .. _pip: https://pip.pypa.io/en/stable/
 
-.. _`release section`: https://github.com/SunPower/pvfactors/releases
+.. _`release section`: https://github.com/pvlib/solarfactors/releases
 
-.. |Logo| image:: https://raw.githubusercontent.com/SunPower/pvfactors/master/docs/sphinx/_static/logo.png
-          :target: http://sunpower.github.io/pvfactors/
+.. |Logo| image:: https://github.com/pvlib/solarfactors/blob/main/docs/sphinx/_static/logo_small.png?raw=true
+          :target: https://solarfactors.readthedocs.io/en/latest/index.html
 
 .. |CircleCI| image:: https://circleci.com/gh/SunPower/pvfactors.svg?style=shield
               :target: https://circleci.com/gh/SunPower/pvfactors
 
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
-             :target: https://github.com/SunPower/pvfactors/blob/master/LICENSE
+             :target: https://github.com/pvlib/solarfactors/blob/main/LICENSE
 
-.. |PyPI-Status| image:: https://img.shields.io/pypi/v/pvfactors.svg
-                 :target: https://pypi.org/project/pvfactors
+.. |PyPI-Status| image:: https://img.shields.io/pypi/v/solarfactors.svg
+                 :target: https://pypi.org/project/solarfactors/
 
-.. |PyPI-Versions| image:: https://img.shields.io/pypi/pyversions/pvfactors.svg?logo=python&logoColor=white
-                   :target: https://pypi.org/project/pvfactors
+.. |PyPI-Versions| image:: https://img.shields.io/pypi/pyversions/solarfactors.svg?logo=python&logoColor=white
+                   :target: https://pypi.org/project/solarfactors/
