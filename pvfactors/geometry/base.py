@@ -231,6 +231,10 @@ class BaseSurface:
         """Distance between the surface and another geometry."""
         return self.geometry.distance(*args, **kwargs)
 
+    def dwithin(self, *args, **kwargs):
+        """Check if the surface is within a certain distance of another geometry."""
+        return self.geometry.dwithin(*args, **kwargs)
+
     def buffer(self, *args, **kwargs):
         """Buffer the surface."""
         return self.geometry.buffer(*args, **kwargs)
@@ -406,6 +410,10 @@ class ShadeCollection:
     def distance(self, *args, **kwargs):
         """Distance between the collection and another geometry."""
         return self.geometry.distance(*args, **kwargs)
+
+    def dwithin(self, *args, **kwargs):
+        """Check if the collection is within a certain distance of another geometry."""
+        return self.geometry.dwithin(*args, **kwargs)
 
     def _get_shading(self, shaded):
         """Get the surface shading from the provided list of pv surfaces.
@@ -695,6 +703,9 @@ class PVSegment:
 
     def distance(self, *args, **kwargs):
         return self.geometry.distance(*args, **kwargs)
+
+    def dwithin(self, *args, **kwargs):
+        return self.geometry.dwithin(*args, **kwargs)
 
     def _check_collinear(self, illum_collection, shaded_collection):
         """Check that all the surfaces in the PV segment are collinear.
@@ -1001,6 +1012,9 @@ class BaseSide:
 
     def distance(self, *args, **kwargs):
         return self.geometry.distance(*args, **kwargs)
+
+    def dwithin(self, *args, **kwargs):
+        return self.geometry.dwithin(*args, **kwargs)
 
     def intersects(self, *args, **kwargs):
         return self.geometry.intersects(*args, **kwargs)

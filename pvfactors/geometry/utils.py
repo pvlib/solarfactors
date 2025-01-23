@@ -73,7 +73,7 @@ def difference(u, v):
 
 def contains(linestring, point, tol_distance=DISTANCE_TOLERANCE):
     """Fixing floating point errors obtained in shapely for contains"""
-    return linestring.distance(point) < tol_distance
+    return linestring.dwithin(point, tol_distance)
 
 
 def is_collinear(list_elements):
