@@ -176,9 +176,9 @@ class VFTsMethods(object):
 
         # Use reciprocity to calculate ts vf from gnd surf to pv row surface
         gnd_surf_length = gnd_surf.length
-        vf_gnd_to_pvrow_surf = np.where(
-            gnd_surf_length > DISTANCE_TOLERANCE,
-            vf_pvrow_to_gnd_surf * pvrow_surf_length / gnd_surf_length, 0.)
+        vf_gnd_to_pvrow_surf = np.divide(
+            vf_pvrow_to_gnd_surf * pvrow_surf_length, gnd_surf_length,
+            where=gnd_surf_length > DISTANCE_TOLERANCE, out=np.zeros_like(gnd_surf_length))
 
         return vf_pvrow_to_gnd_surf, vf_gnd_to_pvrow_surf
 
@@ -239,9 +239,10 @@ class VFTsMethods(object):
                     vf_i_to_j = self._vf_surface_to_surface(
                         surf_i.coords, surf_j.coords, length_i)
                     vf_i_to_j = np.where(tilted_to_left, vf_i_to_j, 0.)
-                    vf_j_to_i = np.where(
-                        surf_j.length > DISTANCE_TOLERANCE,
-                        vf_i_to_j * length_i / length_j, 0.)
+                    vf_j_to_i = np.divide(
+                        vf_i_to_j * length_i , length_j,
+                        where=length_j > DISTANCE_TOLERANCE,
+                        out=np.zeros_like(length_j))
                     vf_matrix[i, j, :] = vf_i_to_j
                     vf_matrix[j, i, :] = vf_j_to_i
 
@@ -529,9 +530,10 @@ class VFTsMethods(object):
                                             shadow_is_left)
             d2 = self._hottel_string_length(low_pt_pv, right_pt_gnd, obstr_pt,
                                             shadow_is_left)
-        vf_1_to_2 = (d1 + d2 - l1 - l2) / (2. * width)
         # The formula doesn't work if surface is a point
-        vf_1_to_2 = np.where(width > DISTANCE_TOLERANCE, vf_1_to_2, 0.)
+        vf_1_to_2 = np.divide(d1 + d2 - l1 - l2, 2. * width,
+                              where=width > DISTANCE_TOLERANCE,
+                              out=np.zeros_like(width))
 
         return vf_1_to_2
 
@@ -605,9 +607,10 @@ class VFTsMethods(object):
         length_4 = self._distance(line_1.b2, line_2.b1)
         sum_1 = length_1 + length_2
         sum_2 = length_3 + length_4
-        vf_1_to_2 = np.abs(sum_2 - sum_1) / (2. * width_1)
         # The formula doesn't work if the line is a point
-        vf_1_to_2 = np.where(width_1 > DISTANCE_TOLERANCE, vf_1_to_2, 0.)
+        vf_1_to_2 = np.divide(np.abs(sum_2 - sum_1), 2. * width_1,
+                              where=width_1 > DISTANCE_TOLERANCE,
+                              out=np.zeros_like(width_1))
 
         return vf_1_to_2
 
