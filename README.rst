@@ -186,7 +186,7 @@ The users can also create a "report" while running the simulations that will rel
 Installation
 ------------
 
-pvfactors is currently compatible and tested with Python 3.11 and Shapely 2.0.6, and is available in `PyPI <https://pypi.org/project/solarfactors/>`_. The easiest way to install solarfactors is to use pip_ as follows:
+solarfactors is currently compatible and tested with Python 3.11 and Shapely 2.0.6, and is available in `PyPI <https://pypi.org/project/solarfactors/>`_. The easiest way to install solarfactors is to use pip_ as follows:
 
 .. code:: sh
 
