@@ -47,7 +47,7 @@ setup(name=DISTNAME,
       install_requires=INSTALL_REQUIRES,
       extras_require={
           'test': TESTS_REQUIRES,
-          'doc': ['Sphinx~=4.0', 'sphinx_rtd_theme', 'nbsphinx',
+          'doc': ['sphinx', 'sphinx_rtd_theme', 'nbsphinx',
                   'sphinxcontrib_github_alt',
                   'ipykernel']
       },
