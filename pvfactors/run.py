@@ -278,7 +278,7 @@ def _run_serially(args):
 
     """
     report_builder, pvarray_parameters, timestamps, dni, dhi, \
-        solar_zenith, solar_azimuth, surface_tilt, surface_azimuth,\
+        solar_zenith, solar_azimuth, surface_tilt, surface_azimuth, \
         albedo, cls_pvarray, cls_engine, cls_irradiance, cls_vf, \
         fast_mode_pvrow_index, fast_mode_segment_index, \
         irradiance_model_params, vf_calculator_params, ghi, idx = args

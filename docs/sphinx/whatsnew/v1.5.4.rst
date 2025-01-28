@@ -1,0 +1,14 @@
+.. _whatsnew_154:
+
+v1.5.4 (???)
+======================
+
+
+Maintenance
+-----------
+* Drop Python 3.7 support (:issue:`20`)
+
+
+Contributors
+------------
+* Marc Anoma (:ghuser:`anomam`)
