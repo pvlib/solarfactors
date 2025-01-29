@@ -7,6 +7,8 @@ v1.5.4 (???)
 Maintenance
 -----------
 * Drop Python 3.7 support (:issue:`20`)
+* Switch to pyproject.toml file (:issue:`19`)
+* Clean up (:pull:`23`)
 
 
 Contributors
