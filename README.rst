@@ -208,7 +208,7 @@ Requirements are included in the ``requirements.txt`` file of the package. Here 
 Citing pvfactors
 ----------------
 
-If you use openfactors in a published work, cite the following paper:
+If you use solarfactors in a published work, cite the following paper:
 
 
 .. parsed-literal::
