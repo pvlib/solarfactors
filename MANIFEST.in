@@ -1,2 +1,4 @@
+# cannot officially get rid of this file yet
+# https://github.com/pypa/setuptools/issues/3341
 include versioneer.py
 include pvfactors/_version.py

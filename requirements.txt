@@ -1,5 +1,0 @@
-pvlib>=0.9.0
-shapely>=2.0
-matplotlib
-future
-six
