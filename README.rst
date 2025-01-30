@@ -219,7 +219,7 @@ If you use solarfactors in a published work, cite the following paper:
 Contributing
 ------------
 
-Contributions are needed in order to improve openfactors.
+Contributions are needed in order to improve solarfactors.
 
 If you wish to contribute, you can start by forking and cloning the repository, and then installing openfactors using pip_ in the root folder of the package:
 
