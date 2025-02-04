@@ -221,7 +221,7 @@ Contributing
 
 Contributions are needed in order to improve solarfactors.
 
-If you wish to contribute, you can start by forking and cloning the repository, and then installing openfactors using pip_ in the root folder of the package:
+If you wish to contribute, you can start by forking and cloning the repository, and then installing solarfactors using pip_ in the root folder of the package:
 
 .. code:: sh
 
