@@ -238,11 +238,11 @@ To install the package in editable mode, you can use:
 Testing
 +++++++
 
-Install test dependencies by running:
+Install test dependencies using the ``test`` extra:
 
 .. code:: sh
 
-    $ pip install pytest mock
+    $ pip install .[test]
 
 Then run the tests using:
 
