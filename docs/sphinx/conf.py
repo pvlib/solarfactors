@@ -341,8 +341,8 @@ def setup(app):
 
 
 extlinks = {
-    'issue': ('https://github.com/pvlib/solarfactors/issues/%s', 'GH'),
-    'pull': ('https://github.com/pvlib/solarfactors/pull/%s', 'GH'),
-    'doi': ('http://dx.doi.org/%s', 'DOI: '),
-    'ghuser': ('https://github.com/%s', '@')
+    'issue': ('https://github.com/pvlib/solarfactors/issues/%s', 'GH #%s'),
+    'pull': ('https://github.com/pvlib/solarfactors/pull/%s', 'GH #%s'),
+    'doi': ('http://dx.doi.org/%s', 'DOI:%s'),
+    'ghuser': ('https://github.com/%s', '@%s')
 }

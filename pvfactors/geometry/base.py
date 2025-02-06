@@ -9,7 +9,6 @@ from pvfactors.geometry.plot import plot_coords, plot_bounds, plot_line
 from pvfactors.geometry.utils import \
     is_collinear, check_collinear, are_2d_vecs_collinear, difference, contains
 from shapely.geometry import GeometryCollection, LineString
-from shapely.geometry.collection import geos_geometrycollection_from_py
 from shapely.ops import linemerge
 from pvlib.tools import cosd, sind
 
@@ -159,8 +158,8 @@ def _get_solar_2d_vectors(solar_zenith, solar_azimuth, axis_azimuth):
     return solar_2d_vector
 
 
-class BaseSurface(LineString):
-    """Base surfaces will be extensions of :py:class:`LineString` classes,
+class BaseSurface:
+    """BaseSurface will wrap the :py:class:`LineString` class,
     but adding an orientation to it (normal vector).
     So two surfaces could use the same linestring, but have opposite
     orientations."""
@@ -190,9 +189,8 @@ class BaseSurface(LineString):
         params : dict, optional
             Surface float parameters (Default = None)
         """
-
+        self.geometry = LineString(coords)  # Composition
         param_names = [] if param_names is None else param_names
-        super(BaseSurface, self).__init__(coords)
         if normal_vector is None:
             self.n_vector = self._calculate_n_vector()
         else:
@@ -202,10 +200,49 @@ class BaseSurface(LineString):
         self.params = params if params is not None \
             else dict.fromkeys(self.param_names)
 
+    @property
+    def is_empty(self):
+        """Check if the surface is empty."""
+        return self.geometry.is_empty
+
+    @property
+    def length(self):
+        """Return the length of the surface."""
+        return self.geometry.length
+
+    @property
+    def boundary(self):
+        """Return the boundary of the surface."""
+        return self.geometry.boundary
+
+    @property
+    def coords(self):
+        return self.geometry.coords
+
+    @property
+    def centroid(self):
+        return self.geometry.centroid
+
+    def interpolate(self, *args, **kwargs):
+        """Interpolate along the linestring by the given distance."""
+        return self.geometry.interpolate(*args, **kwargs)
+
+    def distance(self, *args, **kwargs):
+        """Distance between the surface and another geometry."""
+        return self.geometry.distance(*args, **kwargs)
+
+    def dwithin(self, *args, **kwargs):
+        """Check if the surface is within a certain distance of another geometry."""
+        return self.geometry.dwithin(*args, **kwargs)
+
+    def buffer(self, *args, **kwargs):
+        """Buffer the surface."""
+        return self.geometry.buffer(*args, **kwargs)
+
     def _calculate_n_vector(self):
         """Calculate normal vector of the surface, if surface is not empty"""
         if not self.is_empty:
-            b1, b2 = self.boundary
+            b1, b2 = self.geometry.boundary.geoms
             dx = b2.x - b1.x
             dy = b2.y - b1.y
             return np.array([-dy, dx])
@@ -231,7 +268,7 @@ class BaseSurface(LineString):
             # Prepare text location
             v = self.n_vector
             v_norm = v / np.linalg.norm(v)
-            centroid = self.centroid
+            centroid = self.geometry.centroid
             alpha = ALPHA_TEXT
             x = centroid.x + alpha * v_norm[0]
             y = centroid.y + alpha * v_norm[1]
@@ -256,7 +293,7 @@ class BaseSurface(LineString):
         :py:class:`shapely.geometry.LineString`
            Resulting difference of current surface minus given linestring
         """
-        return difference(self, linestring)
+        return difference(self.geometry, linestring)
 
     def get_param(self, param):
         """Get parameter value from surface.
@@ -289,7 +326,7 @@ class BaseSurface(LineString):
 
 
 class PVSurface(BaseSurface):
-    """PV surfaces inherit from
+    """PVSurface inherits from
     :py:class:`~pvfactors.geometry.base.BaseSurface`. The only difference is
     that PV surfaces have a ``shaded`` attribute.
     """
@@ -315,14 +352,13 @@ class PVSurface(BaseSurface):
         params : dict, optional
             Surface float parameters (Default = None)
         """
-
         param_names = [] if param_names is None else param_names
         super(PVSurface, self).__init__(coords, normal_vector, index=index,
                                         param_names=param_names, params=params)
         self.shaded = shaded
 
 
-class ShadeCollection(GeometryCollection):
+class ShadeCollection:
     """A group of :py:class:`~pvfactors.geometry.base.PVSurface`
     objects that all have the same shading status. The PV surfaces are not
     necessarily contiguous or collinear."""
@@ -350,7 +386,34 @@ class ShadeCollection(GeometryCollection):
         self.shaded = self._get_shading(shaded)
         self.is_collinear = is_collinear(list_surfaces)
         self.param_names = param_names
-        super(ShadeCollection, self).__init__(list_surfaces)
+        self._geometry_valid = False
+        self._geometry = None
+
+    @property
+    def geometry(self):
+        """Return a Shapely GeometryCollection built from the current surfaces."""
+        if not self._geometry_valid:
+            self._geometry = GeometryCollection([_.geometry for _ in self.list_surfaces])
+            self._geometry_valid = True
+        return self._geometry
+
+    @property
+    def is_empty(self):
+        """Check if the collection is empty."""
+        return self.geometry.is_empty
+
+    @property
+    def length(self):
+        """Convenience property to get the total length of all lines in the collection."""
+        return self.geometry.length
+
+    def distance(self, *args, **kwargs):
+        """Distance between the collection and another geometry."""
+        return self.geometry.distance(*args, **kwargs)
+
+    def dwithin(self, *args, **kwargs):
+        """Check if the collection is within a certain distance of another geometry."""
+        return self.geometry.dwithin(*args, **kwargs)
 
     def _get_shading(self, shaded):
         """Get the surface shading from the provided list of pv surfaces.
@@ -413,7 +476,7 @@ class ShadeCollection(GeometryCollection):
         """
         self.list_surfaces.append(pvsurface)
         self.is_collinear = is_collinear(self.list_surfaces)
-        super(ShadeCollection, self).__init__(self.list_surfaces)
+        self._geometry_valid = False
 
     def remove_linestring(self, linestring):
         """Remove linestring from shade collection.
@@ -432,9 +495,11 @@ class ShadeCollection(GeometryCollection):
                 difference = surface.difference(linestring)
                 # We want to make sure we can iterate on it, as
                 # ``difference`` can be a multi-part geometry or not
-                if not hasattr(difference, '__iter__'):
-                    difference = [difference]
-                for new_geom in difference:
+                if isinstance(difference, LineString):
+                    geoms = [difference]
+                else:
+                    geoms = difference.geoms
+                for new_geom in geoms:
                     if not new_geom.is_empty:
                         new_surface = PVSurface(
                             new_geom.coords, normal_vector=surface.n_vector,
@@ -443,27 +508,14 @@ class ShadeCollection(GeometryCollection):
                         new_list_surfaces.append(new_surface)
             else:
                 new_list_surfaces.append(surface)
-
         self.list_surfaces = new_list_surfaces
-        # Force update, even if list is empty
-        self.update_geom_collection(self.list_surfaces)
-
-    def update_geom_collection(self, list_surfaces):
-        """Force update of geometry collection, even if list is empty
-        https://github.com/Toblerity/Shapely/blob/master/shapely/geometry/collection.py#L42
-
-        Parameters
-        ----------
-        list_surfaces : list of :py:class:`~pvfactors.geometry.base.PVSurface`
-            New list of PV surfaces to update the shade collection in place
-        """
-        self._geom, self._ndim = geos_geometrycollection_from_py(list_surfaces)
+        self._geometry_valid = False
 
     def merge_surfaces(self):
         """Merge all surfaces in the shade collection into one contiguous
         surface, even if they're not contiguous, by using bounds."""
         if len(self.list_surfaces) > 1:
-            merged_lines = linemerge(self.list_surfaces)
+            merged_lines = linemerge(self.geometry)
             minx, miny, maxx, maxy = merged_lines.bounds
             surf_1 = self.list_surfaces[0]
             new_pvsurf = PVSurface(
@@ -471,7 +523,7 @@ class ShadeCollection(GeometryCollection):
                 shaded=self.shaded, normal_vector=surf_1.n_vector,
                 param_names=surf_1.param_names)
             self.list_surfaces = [new_pvsurf]
-            self.update_geom_collection(self.list_surfaces)
+            self._geometry_valid = False
 
     def cut_at_point(self, point):
         """Cut collection at point if the collection contains it.
@@ -485,7 +537,7 @@ class ShadeCollection(GeometryCollection):
         for idx, surface in enumerate(self.list_surfaces):
             if contains(surface, point):
                 # Make sure that not hitting a boundary
-                b1, b2 = surface.boundary
+                b1, b2 = surface.boundary.geoms
                 not_hitting_b1 = b1.distance(point) > DISTANCE_TOLERANCE
                 not_hitting_b2 = b2.distance(point) > DISTANCE_TOLERANCE
                 if not_hitting_b1 and not_hitting_b2:
@@ -503,8 +555,8 @@ class ShadeCollection(GeometryCollection):
                     # Now update collection
                     self.list_surfaces[idx] = new_surf_1
                     self.list_surfaces.append(new_surf_2)
-                    self.update_geom_collection(self.list_surfaces)
                     # No need to continue the loop
+                    self._geometry_valid = False
                     break
 
     def get_param_weighted(self, param):
@@ -602,11 +654,9 @@ class ShadeCollection(GeometryCollection):
         return cls([surf], shaded=shaded, param_names=param_names)
 
 
-class PVSegment(GeometryCollection):
+class PVSegment:
     """A PV segment will be a collection of 2 collinear and contiguous
-    shade collections, a shaded one and an illuminated one. It inherits from
-    :py:class:`shapely.geometry.GeometryCollection`  so that users can still
-    call basic geometrical methods and properties on it, eg call length, etc.
+    shade collections, a shaded one and an illuminated one.
     """
 
     def __init__(self, illum_collection=ShadeCollection(shaded=False),
@@ -632,9 +682,30 @@ class PVSegment(GeometryCollection):
         self._shaded_collection = shaded_collection
         self._illum_collection = illum_collection
         self.index = index
-        self._all_surfaces = None
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
+        self._geometry_valid = False
+        self._geometry = None
+
+    @property
+    def geometry(self):
+        if not self._geometry_valid:
+            self._geometry = GeometryCollection([self._shaded_collection.geometry,
+                                                 self._illum_collection.geometry])
+            self._geometry_valid = True
+        return self._geometry
+
+    @property
+    def is_empty(self):
+        return self.geometry.is_empty
+
+    @property
+    def length(self):
+        return self.geometry.length
+
+    def distance(self, *args, **kwargs):
+        return self.geometry.distance(*args, **kwargs)
+
+    def dwithin(self, *args, **kwargs):
+        return self.geometry.dwithin(*args, **kwargs)
 
     def _check_collinear(self, illum_collection, shaded_collection):
         """Check that all the surfaces in the PV segment are collinear.
@@ -698,18 +769,14 @@ class PVSegment(GeometryCollection):
         # Using a buffer may slow things down, but it's quite crucial
         # in order for shapely to get the intersection accurately see:
         # https://stackoverflow.com/questions/28028910/how-to-deal-with-rounding-errors-in-shapely
-        intersection = (self._illum_collection.buffer(DISTANCE_TOLERANCE)
+        intersection = (self._illum_collection.geometry.buffer(DISTANCE_TOLERANCE)
                         .intersection(linestring))
         if not intersection.is_empty:
-            # Split up only if interesects the illuminated collection
-            # print(intersection)
+            # Split up only if intersects the illuminated collection
             self._shaded_collection.add_linestring(intersection,
                                                    normal_vector=self.n_vector)
-            # print(self._shaded_collection.length)
             self._illum_collection.remove_linestring(intersection)
-            # print(self._illum_collection.length)
-            super(PVSegment, self).__init__([self._shaded_collection,
-                                             self._illum_collection])
+            self._geometry_valid = False
 
     def cut_at_point(self, point):
         """Cut PV segment at point if the segment contains it.
@@ -725,6 +792,7 @@ class PVSegment(GeometryCollection):
                 self._illum_collection.cut_at_point(point)
             else:
                 self._shaded_collection.cut_at_point(point)
+            self._geometry_valid = False
 
     def get_param_weighted(self, param):
         """Get the parameter from the segment's surfaces, after weighting
@@ -855,16 +923,14 @@ class PVSegment(GeometryCollection):
         """
         assert new_collection.shaded, "surface should be shaded"
         self._shaded_collection = new_collection
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
+        self._geometry_valid = False
 
     @shaded_collection.deleter
     def shaded_collection(self):
         """Delete shaded collection of PV segment and replace with empty one.
         """
         self._shaded_collection = ShadeCollection(shaded=True)
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
+        self._geometry_valid = False
 
     @property
     def illum_collection(self):
@@ -882,16 +948,14 @@ class PVSegment(GeometryCollection):
         """
         assert not new_collection.shaded, "surface should not be shaded"
         self._illum_collection = new_collection
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
+        self._geometry_valid = False
 
     @illum_collection.deleter
     def illum_collection(self):
         """Delete illuminated collection of PV segment and replace with empty
         one."""
         self._illum_collection = ShadeCollection(shaded=False)
-        super(PVSegment, self).__init__([self._shaded_collection,
-                                         self._illum_collection])
+        self._geometry_valid = False
 
     @property
     def shaded_length(self):
@@ -913,15 +977,12 @@ class PVSegment(GeometryCollection):
         list of :py:class:`~pvfactors.geometry.base.PVSurface`
             PV surfaces in the PV segment
         """
-        if self._all_surfaces is None:
-            self._all_surfaces = []
-            self._all_surfaces += self._illum_collection.list_surfaces
-            self._all_surfaces += self._shaded_collection.list_surfaces
-        return self._all_surfaces
+        return self._illum_collection.list_surfaces + \
+            self._shaded_collection.list_surfaces
 
 
-class BaseSide(GeometryCollection):
-    """A side represents a fixed collection of PV segments objects that should
+class BaseSide:
+    """A side represents a fixed collection of PV segment objects that should
     all be collinear, with the same normal vector"""
 
     def __init__(self, list_segments=None):
@@ -936,7 +997,27 @@ class BaseSide(GeometryCollection):
         check_collinear(list_segments)
         self.list_segments = tuple(list_segments)
         self._all_surfaces = None
-        super(BaseSide, self).__init__(list_segments)
+
+    @property
+    def geometry(self):
+        return GeometryCollection([_.geometry for _ in self.list_segments])
+
+    @property
+    def is_empty(self):
+        return self.geometry.is_empty
+
+    @property
+    def length(self):
+        return self.geometry.length
+
+    def distance(self, *args, **kwargs):
+        return self.geometry.distance(*args, **kwargs)
+
+    def dwithin(self, *args, **kwargs):
+        return self.geometry.dwithin(*args, **kwargs)
+
+    def intersects(self, *args, **kwargs):
+        return self.geometry.intersects(*args, **kwargs)
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
@@ -1070,7 +1151,7 @@ class BaseSide(GeometryCollection):
             Point where to cut side geometry, if the latter contains the
             former
         """
-        if contains(self, point):
+        if contains(self.geometry, point):
             for segment in self.list_segments:
                 # Nothing will happen to the segments that do not contain
                 # the point

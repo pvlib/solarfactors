@@ -13,10 +13,10 @@ def plot_coords(ax, ob):
 
     """
     try:
-        x, y = ob.xy
+        x, y = ob.geometry.xy
         ax.plot(x, y, 'o', color='#999999', zorder=1)
     except NotImplementedError:
-        for line in ob:
+        for line in ob.geometry.geoms:
             x, y = line.xy
             ax.plot(x, y, 'o', color='#999999', zorder=1)
 
@@ -33,10 +33,10 @@ def plot_bounds(ax, ob):
 
     """
     # Check if shadow reduces to one point (for very specific sun alignment)
-    if len(ob.boundary) == 0:
+    if len(ob.boundary.geoms) == 0:
         x, y = ob.coords[0]
     else:
-        x, y = zip(*list((p.x, p.y) for p in ob.boundary))
+        x, y = zip(*list((p.x, p.y) for p in ob.boundary.geoms))
     ax.plot(x, y, 'o', color='#000000', zorder=1)
 
 
@@ -54,11 +54,11 @@ def plot_line(ax, ob, line_color):
 
     """
     try:
-        x, y = ob.xy
+        x, y = ob.geometry.xy
         ax.plot(x, y, color=line_color, alpha=0.7,
                 linewidth=3, solid_capstyle='round', zorder=2)
     except NotImplementedError:
-        for line in ob:
+        for line in ob.geometry.geoms:
             x, y = line.xy
             ax.plot(x, y, color=line_color,
                     alpha=0.7, linewidth=3, solid_capstyle='round', zorder=2)

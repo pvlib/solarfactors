@@ -1,6 +1,7 @@
 """Module will classes related to PV row geometries"""
 
 import numpy as np
+from shapely.ops import unary_union, linemerge
 from pvfactors.config import COLOR_DIC
 from pvfactors.geometry.base import \
     BaseSide, _coords_from_center_tilt_length, PVSegment
@@ -654,9 +655,10 @@ class TsSegment(object):
 
 class PVRowSide(BaseSide):
     """A PV row side represents the whole surface of one side of a PV row.
+
     At its core it will contain a fixed number of
     :py:class:`~pvfactors.geometry.base.PVSegment` objects that will together
-    constitue one side of a PV row: a PV row side can also be
+    constitute one side of a PV row: a PV row side can also be
     "discretized" into multiple segments"""
 
     def __init__(self, list_segments=[]):
@@ -671,7 +673,7 @@ class PVRowSide(BaseSide):
         super(PVRowSide, self).__init__(list_segments)
 
 
-class PVRow(GeometryCollection):
+class PVRow:
     """A PV row is made of two PV row sides, a front and a back one."""
 
     def __init__(self, front_side=PVRowSide(), back_side=PVRowSide(),
@@ -689,14 +691,42 @@ class PVRow(GeometryCollection):
         original_linestring : :py:class:`shapely.geometry.LineString`, optional
             Full continuous linestring that the PV row will be made of
             (Default = None)
-
         """
         self.front = front_side
         self.back = back_side
         self.index = index
-        self.original_linestring = original_linestring
-        self._all_surfaces = None
-        super(PVRow, self).__init__([self.front, self.back])
+        if original_linestring is None:
+            # Compute the union of the front and back sides, assumedly a
+            # linestring with only two points (TODO: check this assumption /
+            # issue a warning here)
+            self._linestring = LineString(linemerge(unary_union(
+                [front_side.geometry, back_side.geometry])).boundary.geoms)
+        else:
+            self._linestring = original_linestring
+
+    @property
+    def length(self):
+        """Length of the PV row."""
+        return self.front.length + self.back.length
+
+    @property
+    def boundary(self):
+        return self._linestring.boundary
+
+    def intersects(self, line):
+        """Check if the PV row intersects with a line.
+
+        Parameters
+        ----------
+        line : :py:class:`shapely.geometry.LineString`
+            Line to check for intersection
+
+        Returns
+        -------
+        bool
+            True if the PV row intersects with the line, False otherwise
+        """
+        return self._linestring.intersects(line)
 
     @classmethod
     def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
@@ -719,7 +749,7 @@ class PVRow(GeometryCollection):
             Eg {'front': 3, 'back': 2} will lead to 3 segments on front side
             and 2 segments on back side. (Default = {})
         param_names : list of str, optional
-            Names of the surface parameters, eg reflectivity, total incident
+            Names of the surface parameters, e.g. reflectivity, total incident
             irradiance, temperature, etc. (Default = [])
 
         Returns
@@ -812,13 +842,13 @@ class PVRow(GeometryCollection):
 
     @property
     def boundary(self):
-        """Boundaries of the PV Row's orginal linestring."""
-        return self.original_linestring.boundary
+        """Boundaries of the PV Row's original linestring."""
+        return self._linestring.boundary
 
     @property
     def highest_point(self):
         """Highest point of the PV Row."""
-        b1, b2 = self.boundary
+        b1, b2 = self.boundary.geoms
         highest_point = b1 if b1.y > b2.y else b2
         return highest_point
 
@@ -832,11 +862,7 @@ class PVRow(GeometryCollection):
     @property
     def all_surfaces(self):
         """List of all the surfaces in the PV row."""
-        if self._all_surfaces is None:
-            self._all_surfaces = []
-            self._all_surfaces += self.front.all_surfaces
-            self._all_surfaces += self.back.all_surfaces
-        return self._all_surfaces
+        return self.front.all_surfaces + self.back.all_surfaces
 
     @property
     def surface_indices(self):
