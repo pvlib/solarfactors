@@ -240,7 +240,7 @@ class VFTsMethods(object):
                         surf_i.coords, surf_j.coords, length_i)
                     vf_i_to_j = np.where(tilted_to_left, vf_i_to_j, 0.)
                     vf_j_to_i = np.divide(
-                        vf_i_to_j * length_i , length_j,
+                        vf_i_to_j * length_i, length_j,
                         where=length_j > DISTANCE_TOLERANCE,
                         out=np.zeros_like(length_j))
                     vf_matrix[i, j, :] = vf_i_to_j

@@ -5,7 +5,7 @@ from shapely.ops import unary_union, linemerge
 from pvfactors.config import COLOR_DIC
 from pvfactors.geometry.base import \
     BaseSide, _coords_from_center_tilt_length, PVSegment
-from shapely.geometry import GeometryCollection, LineString
+from shapely.geometry import LineString
 from pvfactors.geometry.timeseries import \
     TsShadeCollection, TsLineCoords, TsSurface
 from pvlib.tools import cosd, sind
@@ -708,10 +708,6 @@ class PVRow:
     def length(self):
         """Length of the PV row."""
         return self.front.length + self.back.length
-
-    @property
-    def boundary(self):
-        return self._linestring.boundary
 
     def intersects(self, line):
         """Check if the PV row intersects with a line.
