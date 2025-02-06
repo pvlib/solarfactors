@@ -719,8 +719,8 @@ class TsGround(object):
                             if i_surf == 0:
                                 # Need to merge with preceding if exists
                                 if surface_to_merge is not None:
-                                    coords = [surface_to_merge.boundary[0],
-                                              surface.boundary[1]]
+                                    coords = [surface_to_merge.boundary.geoms[0],
+                                              surface.boundary.geoms[1]]
                                     surface = PVSurface(
                                         coords, shaded=True,
                                         param_names=self.param_names,
@@ -735,8 +735,8 @@ class TsGround(object):
                         elif i_surf == 0:
                             # first surface but definitely not last either
                             if surface_to_merge is not None:
-                                coords = [surface_to_merge.boundary[0],
-                                          surface.boundary[1]]
+                                coords = [surface_to_merge.boundary.geoms[0],
+                                          surface.boundary.geoms[1]]
                                 list_shadow_surfaces.append(
                                     PVSurface(coords, shaded=True,
                                               param_names=self.param_names,
