@@ -8,7 +8,7 @@ it can now be installed and used on Python 3.12+.
 
 Maintenance
 -----------
-* Advance shapely dependency to `>=2.0` (:pull:`22`)
+* Advance shapely dependency to ``>=2.0`` (:pull:`22`)
 * Drop Python 3.7 support (:issue:`20`, :pull:`21`)
 * Add support for Python 3.12 and 3.13 (:pull:`17`)
 * Switch to pyproject.toml for PEP 517, 518, and 621 support (:issue:`19`, :pull:`18`)
