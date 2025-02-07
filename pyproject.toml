@@ -27,6 +27,8 @@ dependencies = [
     "pvlib>=0.9.0",
     "shapely>=2.0",
     "matplotlib",
+    "numpy",
+    "pandas",
 ]
 urls = {Homepage = "https://github.com/pvlib/solarfactors"}
 
