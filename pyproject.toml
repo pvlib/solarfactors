@@ -31,7 +31,6 @@ dependencies = [
     "numpy",
     "pandas",
 ]
-urls = {Homepage = "https://github.com/pvlib/solarfactors"}
 
 [project.optional-dependencies]
 test = [
@@ -46,6 +45,11 @@ doc = [
     "sphinxcontrib_github_alt",
     "ipykernel",
 ]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/pvlib/solarfactors/issues"
+Documentation = "https://solarfactors.readthedocs.io/"
+"Source Code" = "https://github.com/pvlib/solarfactors"
 
 [tool.setuptools]
 packages = [
