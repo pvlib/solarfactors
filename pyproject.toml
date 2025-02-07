@@ -59,4 +59,7 @@ packages = [
     "pvfactors.viewfactors",
 ]
 
+[tool.setuptools.exclude-package-data]
+pvfactors = ["tests"]
+
 [tool.setuptools_scm]
