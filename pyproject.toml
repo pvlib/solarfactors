@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2", "wheel", "versioneer[toml]"]
+requires = ["setuptools>=64", "setuptools_scm[toml]>=6.2", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -59,10 +59,4 @@ packages = [
     "pvfactors.viewfactors",
 ]
 
-[tool.versioneer]
-VCS = "git"
-style = "pep440"
-versionfile_source = "pvfactors/_version.py"
-versionfile_build = "pvfactors/_version.py"
-tag_prefix = ""
-parentdir_prefix = "pvfactors-"
+[tool.setuptools_scm]
