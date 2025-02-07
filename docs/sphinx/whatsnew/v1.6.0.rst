@@ -1,0 +1,23 @@
+.. _whatsnew_160:
+
+v1.6.0 (February 7, 2025)
+=========================
+
+This release shifts the package to the new Shapely 2.0 API, meaning
+it can now be installed and used on Python 3.12+.
+
+Maintenance
+-----------
+* Advance shapely dependency to ``>=2.0`` (:pull:`22`)
+* Drop Python 3.7 support (:issue:`20`, :pull:`21`)
+* Add support for Python 3.12 and 3.13 (:pull:`17`)
+* Switch to pyproject.toml for PEP 517, 518, and 621 support (:issue:`19`, :pull:`18`)
+* Miscellaneous clean up (:pull:`23`, :pull:`24`, :pull:`25`)
+
+
+Contributors
+------------
+* Joseph S. (:ghuser:`joseph-sch`)
+* Marc Anoma (:ghuser:`anomam`)
+* Echedey Luis (:ghuser:`echedey-ls`)
+* Kevin Anderson (:ghuser:`kandersolar`)
