@@ -12,7 +12,7 @@
 .settings/
 
 # build
-pvfactors.egg-info/
+solarfactors.egg-info/
 
 # docs
 pvfactors/docs/_build/

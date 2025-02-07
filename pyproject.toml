@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2", "wheel", "versioneer[toml]"]
+requires = ["setuptools>=64", "setuptools_scm[toml]>=6.2", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -21,16 +21,18 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
 ]
+requires-python = ">=3.8"
 dependencies = [
     "pvlib>=0.9.0",
     "shapely>=2.0",
     "matplotlib",
-    "future",
-    "six",
+    "numpy",
+    "pandas",
 ]
-urls = {Homepage = "https://github.com/pvlib/solarfactors"}
 
 [project.optional-dependencies]
 test = [
@@ -46,6 +48,11 @@ doc = [
     "ipykernel",
 ]
 
+[project.urls]
+"Bug Tracker" = "https://github.com/pvlib/solarfactors/issues"
+Documentation = "https://solarfactors.readthedocs.io/"
+"Source Code" = "https://github.com/pvlib/solarfactors"
+
 [tool.setuptools]
 packages = [
     "pvfactors",
@@ -54,10 +61,7 @@ packages = [
     "pvfactors.viewfactors",
 ]
 
-[tool.versioneer]
-VCS = "git"
-style = "pep440"
-versionfile_source = "pvfactors/_version.py"
-versionfile_build = "pvfactors/_version.py"
-tag_prefix = ""
-parentdir_prefix = "pvfactors-"
+[tool.setuptools.exclude-package-data]
+pvfactors = ["tests"]
+
+[tool.setuptools_scm]

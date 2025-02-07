@@ -22,7 +22,7 @@ pvfactors: irradiance modeling made simple
 
 |Logo|
 
-|CircleCI|  |License|  |PyPI-Status|  |PyPI-Versions|
+|GHActions|  |License|  |PyPI-Status|  |PyPI-Versions|
 
 pvfactors is a tool used by PV professionals to calculate the
 irradiance incident on surfaces of a photovoltaic array. It relies on the use of
@@ -198,7 +198,7 @@ The package wheel files are also available in the `release section`_ of the Gith
 Requirements
 ------------
 
-Requirements are included in the ``requirements.txt`` file of the package. Here is a list of important dependencies:
+Requirements are automatically installed when running ``pip install solarfactors``. Here is a list of important dependencies:
 
 * `numpy <https://pypi.python.org/pypi/numpy>`_
 * `pvlib-python <https://pypi.python.org/pypi/pvlib>`_
@@ -286,8 +286,8 @@ References
 .. |Logo| image:: https://github.com/pvlib/solarfactors/blob/main/docs/sphinx/_static/logo_small.png?raw=true
           :target: https://solarfactors.readthedocs.io/en/latest/index.html
 
-.. |CircleCI| image:: https://circleci.com/gh/SunPower/pvfactors.svg?style=shield
-              :target: https://circleci.com/gh/SunPower/pvfactors
+.. |GHActions| image:: https://github.com/pvlib/solarfactors/actions/workflows/test.yml/badge.svg?branch=main
+               :target: https://github.com/pvlib/solarfactors/actions/workflows/test.yml?query=branch%3Amain
 
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
              :target: https://github.com/pvlib/solarfactors/blob/main/LICENSE
