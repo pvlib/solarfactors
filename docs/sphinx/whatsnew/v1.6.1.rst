@@ -7,7 +7,10 @@ v1.6.1 (??)
 Maintenance
 -----------
 
-
+Documentation
+-------------
+* Fixed typo in README. (:issue:`28`, :pull:`29`)
 
 Contributors
 ------------
+* Will Hobbs (:ghuser:`williamhobbs`)
