@@ -1,7 +1,7 @@
 pvlib/solarfactors: a fork of SunPower/pvfactors
 ================================================
 
-This repository is a fork of `SunPower/solarfactors <https://github.com/sunpower/pvfactors>`_,
+This repository is a fork of `SunPower/pvfactors <https://github.com/sunpower/pvfactors>`_,
 a 2-D view factor model for simulating front- and rear-side irradiance for
 bifacial PV systems.
 
