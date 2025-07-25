@@ -6,6 +6,8 @@ v1.6.1 (??)
 
 Maintenance
 -----------
+* Drop Python 3.8 support (:pull:`30`)
+
 
 Documentation
 -------------
@@ -14,3 +16,4 @@ Documentation
 Contributors
 ------------
 * Will Hobbs (:ghuser:`williamhobbs`)
+* Kevin Anderson (:ghuser:`kandersolar`)
