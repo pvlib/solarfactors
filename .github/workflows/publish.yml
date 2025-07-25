@@ -31,7 +31,7 @@ jobs:
       run: python -m build --sdist --wheel
 
     - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@master
+      uses: pypa/gh-action-pypi-publish@v1
       with:
         user: __token__
         password: ${{ secrets.PYPI_TOKEN }}
