@@ -1,0 +1,17 @@
+.. _whatsnew_162:
+
+v1.6.2 (??)
+==========
+
+
+Maintenance
+-----------
+* Matplotlib is now an optional dependency. (:issue:`31`)
+
+
+Documentation
+-------------
+
+Contributors
+------------
+* Kurt Rhee (:ghuser:`kurt-rhee`)

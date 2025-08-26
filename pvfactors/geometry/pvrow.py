@@ -1,14 +1,14 @@
 """Module will classes related to PV row geometries"""
 
 import numpy as np
-from shapely.ops import unary_union, linemerge
-from pvfactors.config import COLOR_DIC
-from pvfactors.geometry.base import \
-    BaseSide, _coords_from_center_tilt_length, PVSegment
-from shapely.geometry import LineString
-from pvfactors.geometry.timeseries import \
-    TsShadeCollection, TsLineCoords, TsSurface
 from pvlib.tools import cosd, sind
+from shapely.geometry import LineString
+from shapely.ops import linemerge, unary_union
+
+from pvfactors.config import COLOR_DIC
+from pvfactors.geometry._optional_imports import requires_matplotlib
+from pvfactors.geometry.base import BaseSide, PVSegment, _coords_from_center_tilt_length
+from pvfactors.geometry.timeseries import TsLineCoords, TsShadeCollection, TsSurface
 
 
 class TsPVRow(object):
@@ -16,8 +16,9 @@ class TsPVRow(object):
     PV row geometries. The coordinates and attributes (front and back sides)
     are all vectorized."""
 
-    def __init__(self, ts_front_side, ts_back_side, xy_center, index=None,
-                 full_pvrow_coords=None):
+    def __init__(
+        self, ts_front_side, ts_back_side, xy_center, index=None, full_pvrow_coords=None
+    ):
         """Initialize timeseries PV row with its front and back sides.
 
         Parameters
@@ -42,9 +43,17 @@ class TsPVRow(object):
         self.full_pvrow_coords = full_pvrow_coords
 
     @classmethod
-    def from_raw_inputs(cls, xy_center, width, rotation_vec,
-                        cut, shaded_length_front, shaded_length_back,
-                        index=None, param_names=None):
+    def from_raw_inputs(
+        cls,
+        xy_center,
+        width,
+        rotation_vec,
+        cut,
+        shaded_length_front,
+        shaded_length_back,
+        index=None,
+        param_names=None,
+    ):
         """Create timeseries PV row using raw inputs.
         Note: shading will always be zero when pv rows are flat.
 
@@ -74,25 +83,35 @@ class TsPVRow(object):
         New timeseries PV row object
         """
         # Calculate full pvrow coords
-        pvrow_coords = TsPVRow._calculate_full_coords(
-            xy_center, width, rotation_vec)
+        pvrow_coords = TsPVRow._calculate_full_coords(xy_center, width, rotation_vec)
         # Calculate normal vectors
         dx = pvrow_coords.b2.x - pvrow_coords.b1.x
         dy = pvrow_coords.b2.y - pvrow_coords.b1.y
         normal_vec_front = np.array([-dy, dx])
         # Calculate front side coords
         ts_front = TsSide.from_raw_inputs(
-            xy_center, width, rotation_vec, cut.get('front', 1),
-            shaded_length_front, n_vector=normal_vec_front,
-            param_names=param_names)
+            xy_center,
+            width,
+            rotation_vec,
+            cut.get("front", 1),
+            shaded_length_front,
+            n_vector=normal_vec_front,
+            param_names=param_names,
+        )
         # Calculate back side coords
         ts_back = TsSide.from_raw_inputs(
-            xy_center, width, rotation_vec, cut.get('back', 1),
-            shaded_length_back, n_vector=-normal_vec_front,
-            param_names=param_names)
+            xy_center,
+            width,
+            rotation_vec,
+            cut.get("back", 1),
+            shaded_length_back,
+            n_vector=-normal_vec_front,
+            param_names=param_names,
+        )
 
-        return cls(ts_front, ts_back, xy_center, index=index,
-                   full_pvrow_coords=pvrow_coords)
+        return cls(
+            ts_front, ts_back, xy_center, index=index, full_pvrow_coords=pvrow_coords
+        )
 
     @staticmethod
     def _calculate_full_coords(xy_center, width, rotation):
@@ -113,10 +132,10 @@ class TsPVRow(object):
             Timeseries coordinates of full PV row
         """
         x_center, y_center = xy_center
-        radius = width / 2.
+        radius = width / 2.0
         # Calculate coords
-        x1 = radius * cosd(rotation + 180.) + x_center
-        y1 = radius * sind(rotation + 180.) + y_center
+        x1 = radius * cosd(rotation + 180.0) + x_center
+        y1 = radius * sind(rotation + 180.0) + y_center
         x2 = radius * cosd(rotation) + x_center
         y2 = radius * sind(rotation) + y_center
         coords = TsLineCoords.from_array(np.array([[x1, y1], [x2, y2]]))
@@ -139,9 +158,15 @@ class TsPVRow(object):
         pvrow = self.at(idx)
         return pvrow.all_surfaces
 
-    def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                    color_illum=COLOR_DIC['pvrow_illum'],
-                    with_surface_index=False):
+    @requires_matplotlib
+    def plot_at_idx(
+        self,
+        idx,
+        ax,
+        color_shaded=COLOR_DIC["pvrow_shaded"],
+        color_illum=COLOR_DIC["pvrow_illum"],
+        with_surface_index=False,
+    ):
         """Plot timeseries PV row at a certain index.
 
         Parameters
@@ -160,8 +185,12 @@ class TsPVRow(object):
             Plot the surfaces with their index values (Default = False)
         """
         pvrow = self.at(idx)
-        pvrow.plot(ax, color_shaded=color_shaded,
-                   color_illum=color_illum, with_index=with_surface_index)
+        pvrow.plot(
+            ax,
+            color_shaded=color_shaded,
+            color_illum=color_illum,
+            with_index=with_surface_index,
+        )
 
     def at(self, idx):
         """Generate a PV row geometry for the desired index.
@@ -177,10 +206,13 @@ class TsPVRow(object):
         """
         front_geom = self.front.at(idx)
         back_geom = self.back.at(idx)
-        original_line = LineString(
-            self.full_pvrow_coords.as_array[:, :, idx])
-        pvrow = PVRow(front_side=front_geom, back_side=back_geom,
-                      index=self.index, original_linestring=original_line)
+        original_line = LineString(self.full_pvrow_coords.as_array[:, :, idx])
+        pvrow = PVRow(
+            front_side=front_geom,
+            back_side=back_geom,
+            index=self.index,
+            original_linestring=original_line,
+        )
         return pvrow
 
     def update_params(self, new_dict):
@@ -207,8 +239,11 @@ class TsPVRow(object):
     @property
     def centroid(self):
         """Centroid point of the timeseries pv row"""
-        centroid = (self.full_pvrow_coords.centroid
-                    if self.full_pvrow_coords is not None else None)
+        centroid = (
+            self.full_pvrow_coords.centroid
+            if self.full_pvrow_coords is not None
+            else None
+        )
         return centroid
 
     @property
@@ -219,8 +254,11 @@ class TsPVRow(object):
     @property
     def highest_point(self):
         """Timeseries point coordinates of highest point of PV row"""
-        high_pt = (self.full_pvrow_coords.highest_point
-                   if self.full_pvrow_coords is not None else None)
+        high_pt = (
+            self.full_pvrow_coords.highest_point
+            if self.full_pvrow_coords is not None
+            else None
+        )
         return high_pt
 
 
@@ -243,8 +281,16 @@ class TsSide(object):
         self.n_vector = n_vector
 
     @classmethod
-    def from_raw_inputs(cls, xy_center, width, rotation_vec, cut,
-                        shaded_length, n_vector=None, param_names=None):
+    def from_raw_inputs(
+        cls,
+        xy_center,
+        width,
+        rotation_vec,
+        cut,
+        shaded_length,
+        n_vector=None,
+        param_names=None,
+    ):
         """Create timeseries side using raw PV row inputs.
         Note: shading will always be zero when PV rows are flat.
 
@@ -276,20 +322,22 @@ class TsSide(object):
 
         # Create Ts segments
         x_center, y_center = xy_center
-        radius = width / 2.
+        radius = width / 2.0
         segment_length = width / cut
-        is_not_flat = rotation_vec != 0.
+        is_not_flat = rotation_vec != 0.0
 
         # Calculate coords of shading point
         r_shade = radius - shaded_length
         x_sh = np.where(
             mask_tilted_to_left,
-            r_shade * cosd(rotation_vec + 180.) + x_center,
-            r_shade * cosd(rotation_vec) + x_center)
+            r_shade * cosd(rotation_vec + 180.0) + x_center,
+            r_shade * cosd(rotation_vec) + x_center,
+        )
         y_sh = np.where(
             mask_tilted_to_left,
-            r_shade * sind(rotation_vec + 180.) + y_center,
-            r_shade * sind(rotation_vec) + y_center)
+            r_shade * sind(rotation_vec + 180.0) + y_center,
+            r_shade * sind(rotation_vec) + y_center,
+        )
 
         # Calculate coords
         list_segments = []
@@ -297,12 +345,11 @@ class TsSide(object):
             # Calculate segment coords
             r1 = radius - i * segment_length
             r2 = radius - (i + 1) * segment_length
-            x1 = r1 * cosd(rotation_vec + 180.) + x_center
-            y1 = r1 * sind(rotation_vec + 180.) + y_center
+            x1 = r1 * cosd(rotation_vec + 180.0) + x_center
+            y1 = r1 * sind(rotation_vec + 180.0) + y_center
             x2 = r2 * cosd(rotation_vec + 180) + x_center
             y2 = r2 * sind(rotation_vec + 180) + y_center
-            segment_coords = TsLineCoords.from_array(
-                np.array([[x1, y1], [x2, y2]]))
+            segment_coords = TsLineCoords.from_array(np.array([[x1, y1], [x2, y2]]))
             # Determine lowest and highest points of segment
             x_highest = np.where(mask_tilted_to_left, x2, x1)
             y_highest = np.where(mask_tilted_to_left, y2, y1)
@@ -310,11 +357,14 @@ class TsSide(object):
             y_lowest = np.where(mask_tilted_to_left, y1, y2)
             # Calculate illum and shaded coords
             x2_illum, y2_illum = x_highest, y_highest
-            x1_shaded, y1_shaded, x2_shaded, y2_shaded = \
-                x_lowest, y_lowest, x_lowest, y_lowest
+            x1_shaded, y1_shaded, x2_shaded, y2_shaded = (
+                x_lowest,
+                y_lowest,
+                x_lowest,
+                y_lowest,
+            )
             mask_all_shaded = (y_sh > y_highest) & (is_not_flat)
-            mask_partial_shaded = (y_sh > y_lowest) & (~ mask_all_shaded) \
-                & (is_not_flat)
+            mask_partial_shaded = (y_sh > y_lowest) & (~mask_all_shaded) & (is_not_flat)
             # Calculate second boundary point of shade
             x2_shaded = np.where(mask_all_shaded, x_highest, x2_shaded)
             x2_shaded = np.where(mask_partial_shaded, x_sh, x2_shaded)
@@ -323,23 +373,40 @@ class TsSide(object):
             x1_illum = x2_shaded
             y1_illum = y2_shaded
             illum_coords = TsLineCoords.from_array(
-                np.array([[x1_illum, y1_illum], [x2_illum, y2_illum]]))
+                np.array([[x1_illum, y1_illum], [x2_illum, y2_illum]])
+            )
             shaded_coords = TsLineCoords.from_array(
-                np.array([[x1_shaded, y1_shaded], [x2_shaded, y2_shaded]]))
+                np.array([[x1_shaded, y1_shaded], [x2_shaded, y2_shaded]])
+            )
             # Create illuminated and shaded collections
             is_shaded = False
             illum = TsShadeCollection(
-                [TsSurface(illum_coords, n_vector=n_vector,
-                           param_names=param_names, shaded=is_shaded)],
-                is_shaded)
+                [
+                    TsSurface(
+                        illum_coords,
+                        n_vector=n_vector,
+                        param_names=param_names,
+                        shaded=is_shaded,
+                    )
+                ],
+                is_shaded,
+            )
             is_shaded = True
             shaded = TsShadeCollection(
-                [TsSurface(shaded_coords, n_vector=n_vector,
-                           param_names=param_names, shaded=is_shaded)],
-                is_shaded)
+                [
+                    TsSurface(
+                        shaded_coords,
+                        n_vector=n_vector,
+                        param_names=param_names,
+                        shaded=is_shaded,
+                    )
+                ],
+                is_shaded,
+            )
             # Create segment
-            segment = TsSegment(segment_coords, illum, shaded,
-                                n_vector=n_vector, index=i)
+            segment = TsSegment(
+                segment_coords, illum, shaded, n_vector=n_vector, index=i
+            )
             list_segments.append(segment)
 
         return cls(list_segments, n_vector=n_vector)
@@ -379,8 +446,14 @@ class TsSide(object):
         side = BaseSide(list_geom_segments)
         return side
 
-    def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                    color_illum=COLOR_DIC['pvrow_illum']):
+    @requires_matplotlib
+    def plot_at_idx(
+        self,
+        idx,
+        ax,
+        color_shaded=COLOR_DIC["pvrow_shaded"],
+        color_illum=COLOR_DIC["pvrow_illum"],
+    ):
         """Plot timeseries side at a certain index.
 
         Parameters
@@ -397,13 +470,14 @@ class TsSide(object):
             COLOR_DIC['pvrow_illum'])
         """
         side_geom = self.at(idx)
-        side_geom.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
-                       with_index=False)
+        side_geom.plot(
+            ax, color_shaded=color_shaded, color_illum=color_illum, with_index=False
+        )
 
     @property
     def shaded_length(self):
         """Timeseries shaded length of the side."""
-        length = 0.
+        length = 0.0
         for seg in self.list_segments:
             length += seg.shaded.length
         return length
@@ -411,7 +485,7 @@ class TsSide(object):
     @property
     def length(self):
         """Timeseries length of side."""
-        length = 0.
+        length = 0.0
         for seg in self.list_segments:
             length += seg.length
         return length
@@ -451,7 +525,7 @@ class TsSide(object):
         KeyError
             if parameter name not in a surface parameters
         """
-        value = 0.
+        value = 0.0
         for seg in self.list_segments:
             value += seg.get_param_ww(param)
         return value
@@ -488,8 +562,9 @@ class TsSegment(object):
     """A TsSegment is a timeseries segment that has a timeseries shaded
     collection and a timeseries illuminated collection."""
 
-    def __init__(self, coords, illum_collection, shaded_collection,
-                 index=None, n_vector=None):
+    def __init__(
+        self, coords, illum_collection, shaded_collection, index=None, n_vector=None
+    ):
         """Initialize timeseries segment using segment coordinates and
         timeseries illuminated and shaded surfaces.
 
@@ -531,8 +606,14 @@ class TsSegment(object):
         segment = self.at(idx)
         return segment.all_surfaces
 
-    def plot_at_idx(self, idx, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-                    color_illum=COLOR_DIC['pvrow_illum']):
+    @requires_matplotlib
+    def plot_at_idx(
+        self,
+        idx,
+        ax,
+        color_shaded=COLOR_DIC["pvrow_shaded"],
+        color_illum=COLOR_DIC["pvrow_illum"],
+    ):
         """Plot timeseries segment at a certain index.
 
         Parameters
@@ -549,8 +630,9 @@ class TsSegment(object):
             COLOR_DIC['pvrow_illum'])
         """
         segment = self.at(idx)
-        segment.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
-                     with_index=False)
+        segment.plot(
+            ax, color_shaded=color_shaded, color_illum=color_illum, with_index=False
+        )
 
     def at(self, idx):
         """Generate a PV segment geometry for the desired index.
@@ -569,9 +651,11 @@ class TsSegment(object):
         # Create shaded collection
         shaded_collection = self.shaded.at(idx)
         # Create PV segment
-        segment = PVSegment(illum_collection=illum_collection,
-                            shaded_collection=shaded_collection,
-                            index=self.index)
+        segment = PVSegment(
+            illum_collection=illum_collection,
+            shaded_collection=shaded_collection,
+            index=self.index,
+        )
         return segment
 
     @property
@@ -676,8 +760,13 @@ class PVRowSide(BaseSide):
 class PVRow:
     """A PV row is made of two PV row sides, a front and a back one."""
 
-    def __init__(self, front_side=PVRowSide(), back_side=PVRowSide(),
-                 index=None, original_linestring=None):
+    def __init__(
+        self,
+        front_side=PVRowSide(),
+        back_side=PVRowSide(),
+        index=None,
+        original_linestring=None,
+    ):
         """Initialize PV row.
 
         Parameters
@@ -699,8 +788,11 @@ class PVRow:
             # Compute the union of the front and back sides, assumedly a
             # linestring with only two points (TODO: check this assumption /
             # issue a warning here)
-            self._linestring = LineString(linemerge(unary_union(
-                [front_side.geometry, back_side.geometry])).boundary.geoms)
+            self._linestring = LineString(
+                linemerge(
+                    unary_union([front_side.geometry, back_side.geometry])
+                ).boundary.geoms
+            )
         else:
             self._linestring = original_linestring
 
@@ -725,8 +817,15 @@ class PVRow:
         return self._linestring.intersects(line)
 
     @classmethod
-    def from_linestring_coords(cls, coords, shaded=False, normal_vector=None,
-                               index=None, cut={}, param_names=[]):
+    def from_linestring_coords(
+        cls,
+        coords,
+        shaded=False,
+        normal_vector=None,
+        index=None,
+        cut={},
+        param_names=[],
+    ):
         """Create a PV row with a single PV surface and using linestring
         coordinates.
 
@@ -754,24 +853,46 @@ class PVRow:
         """
         index_single_segment = 0
         front_side = PVRowSide.from_linestring_coords(
-            coords, shaded=shaded, normal_vector=normal_vector,
-            index=index_single_segment, n_segments=cut.get('front', 1),
-            param_names=param_names)
+            coords,
+            shaded=shaded,
+            normal_vector=normal_vector,
+            index=index_single_segment,
+            n_segments=cut.get("front", 1),
+            param_names=param_names,
+        )
         if normal_vector is not None:
-            back_n_vec = - np.array(normal_vector)
+            back_n_vec = -np.array(normal_vector)
         else:
-            back_n_vec = - front_side.n_vector
+            back_n_vec = -front_side.n_vector
         back_side = PVRowSide.from_linestring_coords(
-            coords, shaded=shaded, normal_vector=back_n_vec,
-            index=index_single_segment, n_segments=cut.get('back', 1),
-            param_names=param_names)
-        return cls(front_side=front_side, back_side=back_side, index=index,
-                   original_linestring=LineString(coords))
+            coords,
+            shaded=shaded,
+            normal_vector=back_n_vec,
+            index=index_single_segment,
+            n_segments=cut.get("back", 1),
+            param_names=param_names,
+        )
+        return cls(
+            front_side=front_side,
+            back_side=back_side,
+            index=index,
+            original_linestring=LineString(coords),
+        )
 
     @classmethod
-    def from_center_tilt_width(cls, xy_center, tilt, width, surface_azimuth,
-                               axis_azimuth, shaded=False, normal_vector=None,
-                               index=None, cut={}, param_names=[]):
+    def from_center_tilt_width(
+        cls,
+        xy_center,
+        tilt,
+        width,
+        surface_azimuth,
+        axis_azimuth,
+        shaded=False,
+        normal_vector=None,
+        index=None,
+        cut={},
+        param_names=[],
+    ):
         """Create a PV row using mainly the coordinates of the line center,
         a tilt angle, and its length.
 
@@ -806,15 +927,26 @@ class PVRow:
         -------
         :py:class:`~pvfactors.geometry.pvrow.PVRow` object
         """
-        coords = _coords_from_center_tilt_length(xy_center, tilt, width,
-                                                 surface_azimuth, axis_azimuth)
-        return cls.from_linestring_coords(coords, shaded=shaded,
-                                          normal_vector=normal_vector,
-                                          index=index, cut=cut,
-                                          param_names=param_names)
+        coords = _coords_from_center_tilt_length(
+            xy_center, tilt, width, surface_azimuth, axis_azimuth
+        )
+        return cls.from_linestring_coords(
+            coords,
+            shaded=shaded,
+            normal_vector=normal_vector,
+            index=index,
+            cut=cut,
+            param_names=param_names,
+        )
 
-    def plot(self, ax, color_shaded=COLOR_DIC['pvrow_shaded'],
-             color_illum=COLOR_DIC['pvrow_illum'], with_index=False):
+    @requires_matplotlib
+    def plot(
+        self,
+        ax,
+        color_shaded=COLOR_DIC["pvrow_shaded"],
+        color_illum=COLOR_DIC["pvrow_illum"],
+        with_index=False,
+    ):
         """Plot the surfaces of the PV Row.
 
         Parameters
@@ -831,10 +963,18 @@ class PVRow:
             Flag to annotate surfaces with their indices (Default = False)
 
         """
-        self.front.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
-                        with_index=with_index)
-        self.back.plot(ax, color_shaded=color_shaded, color_illum=color_illum,
-                       with_index=with_index)
+        self.front.plot(
+            ax,
+            color_shaded=color_shaded,
+            color_illum=color_illum,
+            with_index=with_index,
+        )
+        self.back.plot(
+            ax,
+            color_shaded=color_shaded,
+            color_illum=color_illum,
+            with_index=with_index,
+        )
 
     @property
     def boundary(self):

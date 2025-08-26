@@ -2,9 +2,11 @@
 calculations."""
 
 import numpy as np
-from pvfactors.config import DISTANCE_TOLERANCE
-from pvfactors.geometry.base import PVSurface, ShadeCollection
 from shapely.geometry import GeometryCollection
+
+from pvfactors.config import DISTANCE_TOLERANCE
+from pvfactors.geometry._optional_imports import requires_matplotlib
+from pvfactors.geometry.base import PVSurface, ShadeCollection
 
 
 class TsShadeCollection(object):
@@ -35,7 +37,7 @@ class TsShadeCollection(object):
     @property
     def length(self):
         """Total length of the collection"""
-        length = 0.
+        length = 0.0
         for ts_surf in self._list_ts_surfaces:
             length += ts_surf.length
         return length
@@ -104,8 +106,11 @@ class TsShadeCollection(object):
         -------
         collection : :py:class:`~pvfactors.geometry.base.ShadeCollection`
         """
-        list_surfaces = [ts_surf.at(idx) for ts_surf in self._list_ts_surfaces
-                         if not ts_surf.at(idx).is_empty]
+        list_surfaces = [
+            ts_surf.at(idx)
+            for ts_surf in self._list_ts_surfaces
+            if not ts_surf.at(idx).is_empty
+        ]
         return ShadeCollection(list_surfaces, shaded=self.shaded)
 
 
@@ -113,8 +118,9 @@ class TsSurface(object):
     """Timeseries surface class: vectorized representation of PV surface
     geometries."""
 
-    def __init__(self, coords, n_vector=None, param_names=None, index=None,
-                 shaded=False):
+    def __init__(
+        self, coords, n_vector=None, param_names=None, index=None, shaded=False
+    ):
         """Initialize timeseries surface using timeseries coordinates.
 
         Parameters
@@ -160,17 +166,21 @@ class TsSurface(object):
             return GeometryCollection()
         else:
             # Get normal vector at idx
-            n_vector = (self.n_vector[:, idx] if self.n_vector is not None
-                        else None)
+            n_vector = self.n_vector[:, idx] if self.n_vector is not None else None
             # Get params at idx
             # TODO: should find faster solution
             params = _get_params_at_idx(idx, self.params)
             # Return a pv surface geometry with given params
-            return PVSurface(self.coords.at(idx), shaded=self.shaded,
-                             index=self.index, normal_vector=n_vector,
-                             param_names=self.param_names,
-                             params=params)
+            return PVSurface(
+                self.coords.at(idx),
+                shaded=self.shaded,
+                index=self.index,
+                normal_vector=n_vector,
+                param_names=self.param_names,
+                params=params,
+            )
 
+    @requires_matplotlib
     def plot_at_idx(self, idx, ax, color):
         """Plot timeseries PV row at a certain index, only if it's not
         too small.
@@ -245,8 +255,11 @@ class TsSurface(object):
     @property
     def u_vector(self):
         """Vector orthogonal to the surface's normal vector"""
-        u_vector = (None if self.n_vector is None else
-                    np.array([-self.n_vector[1, :], self.n_vector[0, :]]))
+        u_vector = (
+            None
+            if self.n_vector is None
+            else np.array([-self.n_vector[1, :], self.n_vector[0, :]])
+        )
         return u_vector
 
     @property
@@ -302,8 +315,7 @@ class TsLineCoords(object):
     @property
     def length(self):
         """Timeseries length of the line."""
-        return np.sqrt((self.b2.y - self.b1.y)**2
-                       + (self.b2.x - self.b1.x)**2)
+        return np.sqrt((self.b2.y - self.b1.y) ** 2 + (self.b2.x - self.b1.x) ** 2)
 
     @property
     def as_array(self):
@@ -406,6 +418,11 @@ def _get_params_at_idx(idx, params_dict):
     if params_dict is None:
         return None
     else:
-        return {k: (val if (val is None) or np.isscalar(val)
-                    or isinstance(val, dict) else val[idx])
-                for k, val in params_dict.items()}
+        return {
+            k: (
+                val
+                if (val is None) or np.isscalar(val) or isinstance(val, dict)
+                else val[idx]
+            )
+            for k, val in params_dict.items()
+        }
