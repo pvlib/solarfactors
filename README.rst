@@ -117,7 +117,9 @@ The user can quickly create a PV array with ``pvfactors``, and manipulate it wit
               df_inputs.albedo)
 
 The user can then plot the PV array geometry at any given time of the simulation:
-
+Please note that the plot is generated using matplotlib, which is
+not included in the default dependencies, it can be installed
+using `pip install solarfactors[plot]`
 
 .. code:: python
 

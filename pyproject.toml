@@ -8,9 +8,9 @@ dynamic = ["version"]
 description = "2D View Factor Model to calculate the irradiance incident on various surfaces of PV arrays"
 readme = "README.rst"
 authors = [
-    {name = "SunPower and pvlib python Developers", email = "pvlib-admin@googlegroups.com"},
+    { name = "SunPower and pvlib python Developers", email = "pvlib-admin@googlegroups.com" },
 ]
-license = {text = "BSD 3-Clause"}
+license = { text = "BSD 3-Clause" }
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: BSD License",
@@ -25,20 +25,11 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 requires-python = ">=3.9"
-dependencies = [
-    "pvlib>=0.9.0",
-    "shapely>=2.0",
-    "matplotlib",
-    "numpy",
-    "pandas",
-]
+dependencies = ["pvlib>=0.9.0", "shapely>=2.0", "numpy", "pandas"]
 
 [project.optional-dependencies]
-test = [
-    "pytest>=3.2.1",
-    "pytest-mock>=1.10.0",
-    "mock",
-]
+plot = ["matplotlib"]
+test = ["pytest>=3.2.1", "pytest-mock>=1.10.0", "mock", "matplotlib"]
 doc = [
     "sphinx",
     "sphinx_rtd_theme",

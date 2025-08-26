@@ -1,6 +1,9 @@
 """Base functions used to plot 2D PV geometries"""
 
+from ._optional_imports import requires_matplotlib
 
+
+@requires_matplotlib
 def plot_coords(ax, ob):
     """Plot coordinates of shapely objects
 
@@ -14,13 +17,14 @@ def plot_coords(ax, ob):
     """
     try:
         x, y = ob.geometry.xy
-        ax.plot(x, y, 'o', color='#999999', zorder=1)
+        ax.plot(x, y, "o", color="#999999", zorder=1)
     except NotImplementedError:
         for line in ob.geometry.geoms:
             x, y = line.xy
-            ax.plot(x, y, 'o', color='#999999', zorder=1)
+            ax.plot(x, y, "o", color="#999999", zorder=1)
 
 
+@requires_matplotlib
 def plot_bounds(ax, ob):
     """Plot boundaries of shapely object
 
@@ -37,9 +41,10 @@ def plot_bounds(ax, ob):
         x, y = ob.coords[0]
     else:
         x, y = zip(*list((p.x, p.y) for p in ob.boundary.geoms))
-    ax.plot(x, y, 'o', color='#000000', zorder=1)
+    ax.plot(x, y, "o", color="#000000", zorder=1)
 
 
+@requires_matplotlib
 def plot_line(ax, ob, line_color):
     """Plot boundaries of shapely line
 
@@ -55,10 +60,24 @@ def plot_line(ax, ob, line_color):
     """
     try:
         x, y = ob.geometry.xy
-        ax.plot(x, y, color=line_color, alpha=0.7,
-                linewidth=3, solid_capstyle='round', zorder=2)
+        ax.plot(
+            x,
+            y,
+            color=line_color,
+            alpha=0.7,
+            linewidth=3,
+            solid_capstyle="round",
+            zorder=2,
+        )
     except NotImplementedError:
         for line in ob.geometry.geoms:
             x, y = line.xy
-            ax.plot(x, y, color=line_color,
-                    alpha=0.7, linewidth=3, solid_capstyle='round', zorder=2)
+            ax.plot(
+                x,
+                y,
+                color=line_color,
+                alpha=0.7,
+                linewidth=3,
+                solid_capstyle="round",
+                zorder=2,
+            )
