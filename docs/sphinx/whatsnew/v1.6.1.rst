@@ -6,7 +6,7 @@ v1.6.1 (??)
 
 Maintenance
 -----------
-* Drop Python 3.8 support (:pull:`30`)
+* Drop Python 3.8 and 3.9 support (:pull:`30`, :pull:`33`)
 
 
 Documentation
