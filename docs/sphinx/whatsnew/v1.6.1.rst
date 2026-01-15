@@ -3,12 +3,16 @@
 v1.6.1 (??)
 ==========
 
+This release includes changes for compatibility with pvlib 0.14.0.
+
+Requirements
+------------
+* pvlib >= 0.14.0 (:pull:`39`)
 
 Maintenance
 -----------
 * Drop Python 3.8 and 3.9 support (:pull:`30`, :pull:`33`)
 * Add Python 3.14 support (:pull:`35`)
-
 
 Documentation
 -------------
