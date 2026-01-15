@@ -132,6 +132,7 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
 
     df_inputs = pd.concat([df_inputs, components, vf_perez, luminance],
                           axis=1, join='outer')
+    df_inputs = df_inputs.rename(columns={'poa_sky_diffuse': 'poa_total_diffuse'})
 
     # Adjust the circumsolar luminance when it hits the back surface
     if df_inputs_back_surface.shape[0] > 0:
