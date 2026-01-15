@@ -3,11 +3,9 @@
 v1.6.1 (??)
 ==========
 
-This release includes changes for compatibility with pvlib 0.14.0.
-
-Requirements
+Enhancements
 ------------
-* pvlib >= 0.14.0 (:pull:`39`)
+* Compatibility with pvlib >=0.14.0. (:pull:`39`)
 
 Maintenance
 -----------

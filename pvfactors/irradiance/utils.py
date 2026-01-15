@@ -94,6 +94,12 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
                                   am,
                                   return_components=True)
 
+    # compatibility with pvlib<0.14.0
+    components = components.rename(columns={'isotropic': 'poa_isotropic',
+                                            'circumsolar': 'poa_circumsolar',
+                                            'horizon': 'poa_horizon',
+                                            'sky_diffuse': 'poa_sky_diffuse'})
+
     # Calculate Perez view factors:
     a = irradiance.aoi_projection(
         df_inputs.surface_tilt,
