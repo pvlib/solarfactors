@@ -94,6 +94,12 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
                                   am,
                                   return_components=True)
 
+    # compatibility with pvlib<0.14.0
+    components = components.rename(columns={'isotropic': 'poa_isotropic',
+                                            'circumsolar': 'poa_circumsolar',
+                                            'horizon': 'poa_horizon',
+                                            'sky_diffuse': 'poa_sky_diffuse'})
+
     # Calculate Perez view factors:
     a = irradiance.aoi_projection(
         df_inputs.surface_tilt,
@@ -114,24 +120,19 @@ def perez_diffuse_luminance(timestamps, surface_tilt, surface_azimuth,
     # Calculate diffuse luminance
     luminance = pd.DataFrame(
         np.array([
-            components['horizon'] / vf_perez['vf_horizon'],
-            components['circumsolar'] / vf_perez['vf_circumsolar'],
-            components['isotropic'] / vf_perez['vf_isotropic']
+            components['poa_horizon'] / vf_perez['vf_horizon'],
+            components['poa_circumsolar'] / vf_perez['vf_circumsolar'],
+            components['poa_isotropic'] / vf_perez['vf_isotropic']
         ]).T,
         index=df_inputs.index,
         columns=['luminance_horizon', 'luminance_circumsolar',
                  'luminance_isotropic']
     )
-    luminance.loc[components['sky_diffuse'] == 0, :] = 0.
-
-    # Format components column names
-    components = components.rename(columns={'isotropic': 'poa_isotropic',
-                                            'circumsolar': 'poa_circumsolar',
-                                            'horizon': 'poa_horizon'})
+    luminance.loc[components['poa_sky_diffuse'] == 0, :] = 0.
 
     df_inputs = pd.concat([df_inputs, components, vf_perez, luminance],
                           axis=1, join='outer')
-    df_inputs = df_inputs.rename(columns={'sky_diffuse': 'poa_total_diffuse'})
+    df_inputs = df_inputs.rename(columns={'poa_sky_diffuse': 'poa_total_diffuse'})
 
     # Adjust the circumsolar luminance when it hits the back surface
     if df_inputs_back_surface.shape[0] > 0:
