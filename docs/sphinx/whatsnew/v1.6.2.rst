@@ -12,7 +12,7 @@ Bug fixes
   of :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered`: front-side
   incident irradiance decreases for PV rows with a neighboring row on the
   side their front surface faces, and the effect grows with the row tilt
-  (it is largest for vertical PV rows). (:issue:`14`, :pull:`XX`)
+  (it is largest for vertical PV rows). (:issue:`14`, :pull:`41`)
 
 Maintenance
 -----------
