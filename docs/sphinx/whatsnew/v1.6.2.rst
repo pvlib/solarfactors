@@ -3,6 +3,16 @@
 v1.6.2 (??)
 ===========
 
+Bug fixes
+---------
+* The horizon band irradiance is now reduced by the obstruction of the
+  neighboring PV rows on the front surfaces of the PV rows, in the same way
+  as it already was on the back surfaces. Previously, the front surfaces
+  always received the full, unobstructed horizon band. This changes results
+  of :py:class:`~pvfactors.irradiance.models.HybridPerezOrdered`: front-side
+  incident irradiance decreases for PV rows with a neighboring row on the
+  side their front surface faces, and the effect grows with the row tilt
+  (it is largest for vertical PV rows). (:issue:`14`, :pull:`XX`)
 
 Maintenance
 -----------
@@ -10,4 +20,4 @@ Maintenance
 
 Contributors
 ------------
-
+* Jonas Bechler (:ghuser:`JonasBechler`)

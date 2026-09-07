@@ -393,7 +393,8 @@ class HybridPerezOrdered(BaseModel):
     applied to pvfactors :py:class:`~pvfactors.geometry.pvarray.OrderedPVArray`
     objects.
     The model applies direct, circumsolar, and horizon irradiance to the PV
-    array surfaces.
+    array surfaces. The horizon band irradiance is reduced by the obstruction
+    of the neighboring PV rows, on both the front and back surfaces.
     """
 
     params = ['rho', 'inv_rho', 'direct', 'isotropic', 'circumsolar',
@@ -668,12 +669,21 @@ class HybridPerezOrdered(BaseModel):
 
         # Transform timeseries PV rows
         for idx_pvrow, ts_pvrow in enumerate(ts_pvrows):
-            # Front
+            # Front: apply front surface horizon shading
             for ts_seg in ts_pvrow.front.list_segments:
+                # Illum
+                # In ordered pv arrays, there should only be 1 surface -> 0
+                centroid_illum = ts_seg.illum.list_ts_surfaces[0].centroid
+                hor_shd_pct_illum = self._calculate_horizon_shading_pct_ts(
+                    ts_pvrows, centroid_illum, idx_pvrow, tilted_to_left,
+                    is_back_side=False)
                 ts_seg.illum.update_params({
                     'direct': self.direct['front_illum_pvrow'],
                     'circumsolar': self.circumsolar['front_illum_pvrow'],
-                    'horizon': self.horizon['front_pvrow'],
+                    'horizon': self.horizon['front_pvrow'] *
+                    (1. - hor_shd_pct_illum / 100.),
+                    'horizon_unshaded': self.horizon['front_pvrow'],
+                    'horizon_shd_pct': hor_shd_pct_illum,
                     'rho': rho_front,
                     'inv_rho': inv_rho_front,
                     'total_perez': self.pvrow_illum,
@@ -682,11 +692,21 @@ class HybridPerezOrdered(BaseModel):
                     'circumsolar_absorbed': self.faoi_front['circumsolar']
                     * self.circumsolar['front_illum_pvrow'],
                     'horizon_absorbed': self.faoi_front['horizon']
-                    * self.horizon['front_pvrow']})
+                    * self.horizon['front_pvrow']
+                    * (1. - hor_shd_pct_illum / 100.)})
+                # Shaded
+                # In ordered pv arrays, there should only be 1 surface -> 0
+                centroid_shaded = ts_seg.shaded.list_ts_surfaces[0].centroid
+                hor_shd_pct_shaded = self._calculate_horizon_shading_pct_ts(
+                    ts_pvrows, centroid_shaded, idx_pvrow, tilted_to_left,
+                    is_back_side=False)
                 ts_seg.shaded.update_params({
                     'direct': self.direct['front_shaded_pvrow'],
                     'circumsolar': self.circumsolar['front_shaded_pvrow'],
-                    'horizon': self.horizon['front_pvrow'],
+                    'horizon': self.horizon['front_pvrow'] *
+                    (1. - hor_shd_pct_shaded / 100.),
+                    'horizon_unshaded': self.horizon['front_pvrow'],
+                    'horizon_shd_pct': hor_shd_pct_shaded,
                     'rho': rho_front,
                     'inv_rho': inv_rho_front,
                     'total_perez': self.pvrow_shaded,
@@ -695,7 +715,8 @@ class HybridPerezOrdered(BaseModel):
                     'circumsolar_absorbed': self.faoi_front['circumsolar']
                     * self.circumsolar['front_shaded_pvrow'],
                     'horizon_absorbed': self.faoi_front['horizon']
-                    * self.horizon['front_pvrow']})
+                    * self.horizon['front_pvrow']
+                    * (1. - hor_shd_pct_shaded / 100.)})
             # Back: apply back surface horizon shading
             for ts_seg in ts_pvrow.back.list_segments:
                 # Illum

@@ -28,12 +28,12 @@ def test_run_timeseries_engine(fn_report_example, params_serial,
     assert len(report['qinc_front']) == n
     # Test value consistency
     np.testing.assert_almost_equal(np.nansum(report['qinc_back']),
-                                   541.7115807694377)
+                                   541.6917029278669)
     np.testing.assert_almost_equal(np.nansum(report['iso_back']),
                                    18.050083142438311)
     # Check a couple values
     np.testing.assert_almost_equal(report['qinc_back'][7],
-                                   11.160301350847325)
+                                   11.16024743187)
     np.testing.assert_almost_equal(report['qinc_back'][-8],
                                    8.642850754173368)
 
@@ -121,7 +121,7 @@ def test_run_parallel_engine_with_irradiance_params(params_serial,
         irradiance_model_params=irradiance_params)
 
     np.testing.assert_almost_equal(np.nansum(report_no_params['qinc_back']),
-                                   541.7115807694377)
+                                   541.6917029278669)
 
     # The incident irradiance should be higher with larger horizon band
     irradiance_params = {'horizon_band_angle': 15.}
@@ -132,7 +132,7 @@ def test_run_parallel_engine_with_irradiance_params(params_serial,
         irradiance_model_params=irradiance_params)
 
     np.testing.assert_almost_equal(np.nansum(report_w_params['qinc_back']),
-                                   554.5333279555168)
+                                   554.5239027417472)
 
 
 def test_params_ghi_passed():
@@ -228,8 +228,8 @@ def test_run_timeseries_faoi_fn(params_serial, pvmodule_canadian,
     surface_tilt = df_inputs.surface_tilt.values
     surface_azimuth = df_inputs.surface_azimuth.values
 
-    expected_qinc_back = 542.018551
-    expected_qinc_front = 5452.858863
+    expected_qinc_back = 541.998481
+    expected_qinc_front = 5426.967518
 
     # --- Test without passing vf parameters
     # report function with test in it
@@ -258,10 +258,10 @@ def test_run_timeseries_faoi_fn(params_serial, pvmodule_canadian,
 
     np.testing.assert_allclose(np.nansum(report['qinc_back']),
                                expected_qinc_back)
-    np.testing.assert_allclose(np.nansum(report['qabs_back']), 525.757995)
+    np.testing.assert_allclose(np.nansum(report['qabs_back']), 525.738526)
     np.testing.assert_allclose(np.nansum(report['qinc_front']),
                                expected_qinc_front)
-    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5398.330275)
+    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5372.697843)
 
     # --- Test when passing vf parameters
     # Prepare vf calc params
@@ -300,10 +300,10 @@ def test_run_timeseries_faoi_fn(params_serial, pvmodule_canadian,
 
     np.testing.assert_allclose(np.nansum(report['qinc_back']),
                                expected_qinc_back)
-    np.testing.assert_allclose(np.nansum(report['qabs_back']), 520.892016)
+    np.testing.assert_allclose(np.nansum(report['qabs_back']), 520.872326)
     np.testing.assert_allclose(np.nansum(report['qinc_front']),
                                expected_qinc_front)
-    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5347.050682)
+    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5321.764714)
 
 
 def test_run_parallel_faoi_fn(params_serial, df_inputs_clearsky_8760):
@@ -319,8 +319,8 @@ def test_run_parallel_faoi_fn(params_serial, df_inputs_clearsky_8760):
     surface_tilt = df_inputs.surface_tilt.values
     surface_azimuth = df_inputs.surface_azimuth.values
 
-    expected_qinc_back = 542.018551
-    expected_qinc_front = 5452.858863
+    expected_qinc_back = 541.998481
+    expected_qinc_front = 5426.967518
 
     # create calculator
     report = run_parallel_engine(
@@ -332,10 +332,10 @@ def test_run_parallel_faoi_fn(params_serial, df_inputs_clearsky_8760):
 
     np.testing.assert_allclose(np.nansum(report['qinc_back']),
                                expected_qinc_back)
-    np.testing.assert_allclose(np.nansum(report['qabs_back']), 525.757995)
+    np.testing.assert_allclose(np.nansum(report['qabs_back']), 525.738526)
     np.testing.assert_allclose(np.nansum(report['qinc_front']),
                                expected_qinc_front)
-    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5398.330275)
+    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5372.697843)
 
     # --- Test when passing vf parameters
     # the following is a very high number to get agreement in
@@ -357,10 +357,10 @@ def test_run_parallel_faoi_fn(params_serial, df_inputs_clearsky_8760):
 
     np.testing.assert_allclose(np.nansum(report['qinc_back']),
                                expected_qinc_back)
-    np.testing.assert_allclose(np.nansum(report['qabs_back']), 520.892016)
+    np.testing.assert_allclose(np.nansum(report['qabs_back']), 520.872326)
     np.testing.assert_allclose(np.nansum(report['qinc_front']),
                                expected_qinc_front)
-    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5347.050682)
+    np.testing.assert_allclose(np.nansum(report['qabs_front']), 5321.764714)
 
 
 class TestFAOIReportBuilder(object):
