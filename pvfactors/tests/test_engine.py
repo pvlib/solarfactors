@@ -77,21 +77,21 @@ def test_pvengine_float_inputs_perez(params):
     assert isinstance(pvarray, OrderedPVArray)
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[0].front.get_param_weighted('qinc'),
-        1110.1164773159298)
+        1106.7472686164456)
     np.testing.assert_almost_equal(
-        pvarray.ts_pvrows[1].front.get_param_weighted('qinc'), 1110.595903991)
+        pvarray.ts_pvrows[1].front.get_param_weighted('qinc'), 1107.226695346007)
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[2].front.get_param_weighted('qinc'), 1112.37717553)
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[1].back.get_param_weighted('qinc'),
-        116.49050349491208)
+        116.48959141053632)
     # Check absorbed irradiance
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[2].front.get_param_weighted('qabs'),
         1112.37717553 * 0.99)
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[1].back.get_param_weighted('qabs'),
-        116.49050349491208 * 0.97)
+        116.48959141053632 * 0.97)
 
 
 def test_pvengine_ts_inputs_perez(params_serial,
@@ -122,7 +122,7 @@ def test_pvengine_ts_inputs_perez(params_serial,
     np.testing.assert_array_almost_equal(
         report['qinc_front'], [1066.272392, 1065.979824])
     np.testing.assert_array_almost_equal(
-        report['qinc_back'], [135.897106, 136.01297])
+        report['qinc_back'], [135.89557, 136.011437])
     np.testing.assert_array_almost_equal(
         report['iso_front'], [42.816637, 42.780206])
     np.testing.assert_array_almost_equal(
@@ -386,7 +386,7 @@ def test_run_fast_and_full_modes_sequentially(params, fn_report_example):
     report = eng.run_full_mode(fn_build_report=fn_report_example)
 
     np.testing.assert_allclose(qinc_fast, 119.095285)
-    np.testing.assert_allclose(report['qinc_back'], 116.49050349491)
+    np.testing.assert_allclose(report['qinc_back'], 116.48959141053632)
 
 
 def test_pvengine_float_inputs_perez_transparency_spacing_full(params):
@@ -436,7 +436,7 @@ def test_pvengine_float_inputs_perez_transparency_spacing_full(params):
     # Run timestep
     pvarray = eng.run_full_mode(fn_build_report=lambda pvarray: pvarray)
     # Checks
-    expected_back_qinc = 132.13881181118185  # higher than when params are 0
+    expected_back_qinc = 132.1378997268059  # higher than when params are 0
     w_spacing_transparency_back_qinc = (
         pvarray.ts_pvrows[1].back.get_param_weighted('qinc'))
     np.testing.assert_almost_equal(
@@ -558,7 +558,10 @@ def test_check_direct_shading_continuity():
     # Update 2021-10-04 for v1.5.2: for pvlib <0.9.0, expected value
     # was [20.497127, 20.50229]. The values changed slightly because
     # of a bugfix to the Perez model in pvlib 0.9.0. See pvfactors PR #121.
-    expected_out = [20.936348, 20.942163]
+    # Update for v1.6.2: horizon band shading is now also applied to the
+    # front surfaces (solarfactors GH #14), which slightly lowers the
+    # front-side reflections reaching the back. Before: [20.936348, 20.942163]
+    expected_out = [20.936282, 20.942096]
     np.testing.assert_allclose(out, expected_out)
 
 
@@ -654,21 +657,21 @@ def test_engine_w_faoi_fn_in_irradiance_vfcalcs(params, pvmodule_canadian):
     # Checks
     np.testing.assert_allclose(
         pvarray.ts_pvrows[0].front.get_param_weighted('qinc'),
-        1110.1164773159298)
+        1106.7472686164456)
     np.testing.assert_allclose(
-        pvarray.ts_pvrows[1].front.get_param_weighted('qinc'), 1110.595903991)
+        pvarray.ts_pvrows[1].front.get_param_weighted('qinc'), 1107.226695346007)
     np.testing.assert_allclose(
         pvarray.ts_pvrows[2].front.get_param_weighted('qinc'), 1112.37717553)
     np.testing.assert_allclose(
         pvarray.ts_pvrows[1].back.get_param_weighted('qinc'),
-        116.49050349491208)
+        116.48959141053632)
     # Check absorbed irradiance: calculated using faoi functions
     np.testing.assert_allclose(
         pvarray.ts_pvrows[2].front.get_param_weighted('qabs'),
         [1109.1180884], rtol=1e-6)
     np.testing.assert_allclose(
         pvarray.ts_pvrows[1].back.get_param_weighted('qabs'),
-        [114.2143503])
+        [114.21353814])
 
 
 def test_engine_variable_albedo(params, df_inputs_clearsky_8760):
@@ -705,7 +708,7 @@ def test_engine_variable_albedo(params, df_inputs_clearsky_8760):
     bfg_after_aoi = (np.nansum(pvrow.back.get_param_weighted('qabs'))
                      / np.nansum(pvrow.front.get_param_weighted('qabs'))
                      ) * 100.
-    expected_bfg = 14.973198
-    expected_bfg_after_aoi = 14.670709
+    expected_bfg = 15.127773
+    expected_bfg_after_aoi = 14.822162
     np.testing.assert_allclose(bfg, expected_bfg)
     np.testing.assert_allclose(bfg_after_aoi, expected_bfg_after_aoi)

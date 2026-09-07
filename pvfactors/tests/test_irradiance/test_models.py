@@ -293,6 +293,9 @@ def test_hybridperez_ordered_front(params_irr):
     expected_hor_pvrow_no_shad = 7.2486377533042452
     expected_hor_pvrow_w_shad = 2.1452692285058985
     horizon_shading_pct = 70.404518731426592
+    # The front surfaces of pv rows 0 and 1 see the top of the neighboring
+    # row at 8.1 deg elevation, above the 6.5 deg horizon band
+    front_horizon_shading_pct = 100.
 
     # Check fitting
     np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
@@ -325,8 +328,8 @@ def test_hybridperez_ordered_front(params_irr):
         459.40066878, 459.40066878, 459.40066878, 459.40066878,
         459.40066878, 459.40066878, 459.40066878, 459.40066878,
         459.40066878, 459.40066878, 459.40066878, 459.40066878,
-        775.89816756, 7.24863775, 7.24863775, 7.24863775,
-        775.89816756, 7.24863775, 2.14526923, 0.,
+        768.64952981, 0., 7.24863775, 7.24863775,
+        768.64952981, 0., 2.14526923, 0.,
         775.89816756, 7.24863775, 2.14526923, 0.]
     # pvrow direct
     np.testing.assert_almost_equal(
@@ -358,10 +361,20 @@ def test_hybridperez_ordered_front(params_irr):
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[1].front.list_segments[0]
         .illum.get_param_weighted('horizon'),
-        expected_hor_pvrow_no_shad)
+        expected_hor_pvrow_no_shad
+        * (1. - front_horizon_shading_pct / 100.))
+    np.testing.assert_almost_equal(
+        pvarray.ts_pvrows[1].front.list_segments[0]
+        .illum.get_param_weighted('horizon_shd_pct'),
+        front_horizon_shading_pct)
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[1].front.list_segments[0]
         .shaded.get_param_weighted('horizon'),
+        expected_hor_pvrow_no_shad
+        * (1. - front_horizon_shading_pct / 100.))
+    np.testing.assert_almost_equal(
+        pvarray.ts_pvrows[2].front.list_segments[0]
+        .illum.get_param_weighted('horizon'),
         expected_hor_pvrow_no_shad)
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[0].back.list_segments[0]
@@ -479,6 +492,8 @@ def test_hybridperez_ordered_back(params_irr):
     expected_hor_pvrow_w_shad_2 = 3.6101632102156898
     horizon_shading_pct_1 = 16.176997998918541
     horizon_shading_pct_2 = 50.195287265251757
+    expected_hor_front_pvrow_w_shad = 6.5851998450804630
+    front_horizon_shading_pct = 9.1525874350854580
 
     # Check fitting
     np.testing.assert_almost_equal(irr_model.direct['ground_illum'][0],
@@ -512,8 +527,8 @@ def test_hybridperez_ordered_back(params_irr):
         459.40066878, 459.40066878, 459.40066878, 459.40066878,
         459.40066878, 459.40066878, 459.40066878, 459.40066878,
         7.24863775, 7.24863775, 774.72555557, 3.61016321,
-        7.24863775, 7.24863775, 774.72555557, 3.61016321,
-        7.24863775, 7.24863775, 775.89816756, 7.24863775]
+        6.58519985, 6.1648307, 774.72555557, 3.61016321,
+        6.58519985, 6.1648307, 775.89816756, 7.24863775]
 
     # pvrow direct
     np.testing.assert_almost_equal(
@@ -543,8 +558,14 @@ def test_hybridperez_ordered_back(params_irr):
         .illum.get_param_weighted('circumsolar'), 0.)
     # pvrow horizon
     np.testing.assert_almost_equal(
-        pvarray.ts_pvrows[1].front.get_param_weighted('horizon'),
+        pvarray.ts_pvrows[0].front.get_param_weighted('horizon'),
         expected_hor_pvrow_no_shad)
+    np.testing.assert_almost_equal(
+        pvarray.ts_pvrows[1].front.get_param_weighted('horizon'),
+        expected_hor_front_pvrow_w_shad)
+    np.testing.assert_almost_equal(
+        pvarray.ts_pvrows[1].front.get_param_weighted('horizon_shd_pct'),
+        front_horizon_shading_pct)
     np.testing.assert_almost_equal(
         pvarray.ts_pvrows[1].back.list_segments[0]
         .illum.get_param_weighted('horizon'),
@@ -685,6 +706,96 @@ def test_hybridperez_horizon_shading_ts():
     expected_pct_shading = np.array(
         [17.163813, 8.667262, 17.163813, 25.317135, 0.])
     np.testing.assert_allclose(expected_pct_shading, horizon_pct_shading)
+
+
+def test_hybridperez_front_horizon_shading():
+    """Front surfaces must get the same horizon band shading by the
+    neighboring PV rows as the back surfaces (GH issue #14)"""
+
+    # Vertical PV rows: bottom edge at y=0, top edge at y=2, pitch 4
+    params = {
+        'n_pvrows': 3,
+        'pvrow_height': 1.,
+        'pvrow_width': 2.,
+        'axis_azimuth': 0.,
+        'gcr': 0.5
+    }
+    horizon_band_angle = 15.
+    # 1st step: front faces East (right neighbor blocks the front)
+    # 2nd step: front faces West (left neighbor blocks the front)
+    df_inputs = pd.DataFrame({
+        'solar_zenith': [60., 60.],
+        'solar_azimuth': [90., 270.],
+        'surface_tilt': [90., 90.],
+        'surface_azimuth': [90., 270.]},
+        index=pd.date_range('2019-06-14 11:00', periods=2, freq='h'))
+
+    # Initialize and fit pv array
+    pvarray = OrderedPVArray.init_from_dict(params)
+    pvarray.fit(df_inputs.solar_zenith, df_inputs.solar_azimuth,
+                df_inputs.surface_tilt, df_inputs.surface_azimuth)
+    # No direct shading between rows: sun elevation 30 deg, pitch 4 > 2 / tan(30)
+    np.testing.assert_allclose(pvarray.ts_pvrows[1].front.shaded_length, 0.)
+
+    # Fit and transform the irradiance model
+    model = HybridPerezOrdered(horizon_band_angle=horizon_band_angle)
+    n = len(df_inputs)
+    model.fit(df_inputs.index, 1000. * np.ones(n), 100. * np.ones(n),
+              df_inputs.solar_zenith.values, df_inputs.solar_azimuth.values,
+              df_inputs.surface_tilt.values, df_inputs.surface_azimuth.values,
+              0.2)
+    model.transform(pvarray)
+    horizon_unshaded = model.horizon['front_pvrow']
+    assert np.all(horizon_unshaded > 0.)
+
+    # Expected: from the center of a row (y=1), the top of the neighboring
+    # row (y=2) is seen at atan(1 / 4) = 14.04 deg elevation, which
+    # blocks 14.04 / 15 = 93.6% of the horizon band
+    expected_pct_illum = np.rad2deg(np.arctan(1. / 4.)) \
+        / horizon_band_angle * 100.
+    # The zero-length shaded surface sits at the bottom edge (y=0), from
+    # where the neighboring top is seen at atan(2 / 4) = 26.6 deg > 15 deg
+    expected_pct_shaded = 100.
+
+    # Interior row: front shaded by the neighbor in both orientations
+    front_seg = pvarray.ts_pvrows[1].front.list_segments[0]
+    np.testing.assert_allclose(
+        front_seg.illum.get_param_weighted('horizon_shd_pct'),
+        expected_pct_illum)
+    np.testing.assert_allclose(
+        front_seg.shaded.list_ts_surfaces[0].get_param('horizon_shd_pct'),
+        expected_pct_shaded)
+    np.testing.assert_allclose(
+        front_seg.illum.get_param_weighted('horizon_unshaded'),
+        horizon_unshaded)
+    np.testing.assert_allclose(
+        front_seg.illum.get_param_weighted('horizon'),
+        horizon_unshaded * (1. - expected_pct_illum / 100.))
+    np.testing.assert_allclose(
+        pvarray.ts_pvrows[1].front.get_param_weighted('horizon'),
+        horizon_unshaded * (1. - expected_pct_illum / 100.))
+    # Front and back of the interior row see the same obstruction
+    np.testing.assert_allclose(
+        pvarray.ts_pvrows[1].front.get_param_weighted('horizon'),
+        pvarray.ts_pvrows[1].back.get_param_weighted('horizon'))
+
+    # Edge rows: unobstructed when the front faces away from the array,
+    # obstructed by the single neighbor otherwise
+    np.testing.assert_allclose(
+        pvarray.ts_pvrows[2].front.get_param_weighted('horizon_shd_pct'),
+        [0., expected_pct_illum])
+    np.testing.assert_allclose(
+        pvarray.ts_pvrows[0].front.get_param_weighted('horizon_shd_pct'),
+        [expected_pct_illum, 0.])
+    np.testing.assert_allclose(
+        pvarray.ts_pvrows[2].front.get_param_weighted('horizon'),
+        horizon_unshaded * (1. - np.array([0., expected_pct_illum]) / 100.))
+
+    # Absorbed horizon irradiance is shaded the same way
+    np.testing.assert_allclose(
+        front_seg.illum.get_param_weighted('horizon_absorbed'),
+        front_seg.illum.get_param_weighted('horizon')
+        * model.faoi_front['horizon'])
 
 
 def test_hybridperez_transform(df_inputs_clearsky_8760):
