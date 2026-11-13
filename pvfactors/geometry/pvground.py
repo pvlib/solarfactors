@@ -118,7 +118,10 @@ class TsGround(object):
                 [[xs_left_shadow, y_ground * np.ones(n_steps)],
                  [xs_right_shadow, y_ground * np.ones(n_steps)]])
             # --- Cutting points coords calculation
-            dx = (y1s_pvrow - y_ground) / np.tan(rotation_vec)
+            # When rotation is 0, the pvrow plane never intersects the
+            # ground, so dx is infinite (expected)
+            with np.errstate(divide='ignore'):
+                dx = (y1s_pvrow - y_ground) / np.tan(rotation_vec)
             cut_point_coords.append(
                 TsPointCoords(x1s_pvrow - dx, y_ground * np.ones(n_steps)))
 

@@ -6,8 +6,11 @@ v1.6.2 (??)
 
 Maintenance
 -----------
+* Suppress a spurious divide by zero ``RuntimeWarning`` when calculating
+  ground cut points for flat (zero rotation) pvrows.
 
 
 Contributors
 ------------
+* Manos Saratsis (:ghuser:`manossaratsis`)
 
