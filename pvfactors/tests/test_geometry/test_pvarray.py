@@ -1,4 +1,5 @@
 import os
+import warnings
 import numpy as np
 import pandas as pd
 from pvfactors.geometry.pvarray import OrderedPVArray
@@ -398,6 +399,30 @@ def test_orderedpvarray_almost_flat():
     np.testing.assert_allclose(ts_ground.shaded_length, 0)
     # all of the edge points should be outside of range of ground geometry
     for coords in ts_ground.cut_point_coords:
+        assert (coords.x < MIN_X_GROUND) | (coords.x > MAX_X_GROUND)
+
+
+def test_orderedpvarray_flat_no_warning():
+    """Flat pvarray should not raise a divide by zero warning when
+    calculating ground cut points, which should be outside of ground range"""
+
+    params = {
+        'n_pvrows': 3,
+        'pvrow_height': 2.5,
+        'pvrow_width': 2.,
+        'surface_azimuth': 90.,
+        'axis_azimuth': 0.,
+        'surface_tilt': 0.,
+        'gcr': 0.4,
+        'solar_zenith': 30.,
+        'solar_azimuth': 90.,
+    }
+
+    with warnings.catch_warnings():
+        warnings.simplefilter('error', RuntimeWarning)
+        pvarray = OrderedPVArray.fit_from_dict_of_scalars(params)
+
+    for coords in pvarray.ts_ground.cut_point_coords:
         assert (coords.x < MIN_X_GROUND) | (coords.x > MAX_X_GROUND)
 
 
